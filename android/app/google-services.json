@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "686424720942",
+    "project_id": "fir-flutter-6399c",
+    "storage_bucket": "fir-flutter-6399c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:686424720942:android:2a11a74964fda545f201bf",
+        "android_client_info": {
+          "package_name": "com.example.firebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCevpquuLJ0bYRuH66H2D5RyCJpsd2oXzc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:686424720942:android:ebee390e0e58d2a7f201bf",
+        "android_client_info": {
+          "package_name": "com.example.fitness"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCevpquuLJ0bYRuH66H2D5RyCJpsd2oXzc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
