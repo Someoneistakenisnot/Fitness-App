@@ -12,8 +12,9 @@ class ApiCalls {
     };
 
     Map<String, String> payload = {
-      "X-RapidAPI-Host": "calories-burned-by-api-ninjas.p.rapidapi.com",
-      "X-RapidAPI-Key": "c93f0e349bmsh4f90f71e75907a8p166d42jsne574e84b3e47",
+      'X-RapidAPI-Host': 'fitness-api.p.rapidapi.com',
+      'X-RapidAPI-Key': 'c93f0e349bmsh4f90f71e75907a8p166d42jsne574e84b3e47',
+      'Content-Type': 'application/x-www-form-urlencoded',
       //TO DO Add API request parameters
     };
 
