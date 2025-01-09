@@ -1,6 +1,5 @@
-import '../models/fitness_user.dart';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
+// import 'package:Fitness-App/models.bmi.dart';
 
 class ApiCalls {
   void fetchBmi() async {
@@ -8,12 +7,14 @@ class ApiCalls {
 
     Map<String, String> requestHeaders = {
       'X-RapidAPI-Host': 'fitness-api.p.rapidapi.com',
-      'X-RapidAPI-Key': 'YOUR-API-KEY', //TODO
+      'X-RapidAPI-Key': 'c93f0e349bmsh4f90f71e75907a8p166d42jsne574e84b3e47',
       'Content-Type': 'application/x-www-form-urlencoded',
     };
 
     Map<String, String> payload = {
-      //TODO Add API request parameters
+      "X-RapidAPI-Host": "calories-burned-by-api-ninjas.p.rapidapi.com",
+      "X-RapidAPI-Key": "c93f0e349bmsh4f90f71e75907a8p166d42jsne574e84b3e47",
+      //TO DO Add API request parameters
     };
 
     var request = http.Request('POST', Uri.parse(baseURL));
@@ -23,11 +24,14 @@ class ApiCalls {
     http.StreamedResponse response = await request.send();
 
     if (response.statusCode == 200) {
-      //TODO return Bmi object
+      // List<dynamic> jsonList = jsonDecode(response.body) as List<dynamic>;
+      // List<Bmi> BmiInfo = jsonList.map((json) => Bmi.fromJson(json)).toList();
+      // return BmiInfo; //uncomment when apis are implemented in their respective pages
+      //TO DO return Bmi object
     } else {
       throw Exception('Failed to load bmi');
     }
   }
 
-  void fetchBurnedCalories() {}
+  void fetchBurnedCalories() {} //still have yet to do
 }
