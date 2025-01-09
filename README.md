@@ -1,5 +1,5 @@
 # Fitness-App
-MCP Project
+MCP Project<br>
 A fitness flutter app.
 
 ## Getting Started
