@@ -23,6 +23,9 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
         case 2:
           Navigator.pushReplacementNamed(context, '/user');
           break;
+        case 3:
+          Navigator.pushReplacementNamed(context, '/game');
+          break;
       }
     });
   }
@@ -44,6 +47,10 @@ class _MyBottomNavigationBarState extends State<MyBottomNavigationBar> {
           label: 'User',
           icon: Icon(Icons.person),
         ),
+        BottomNavigationBarItem(
+          label: 'Idle',
+          icon: Icon(Icons.gamepad),
+        )
       ],
       currentIndex: widget.selectedIndexNavBar,
       onTap: _onTap,
