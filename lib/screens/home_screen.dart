@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../utilities/firebase_calls.dart';
 import '../widgets/navigation_bar.dart';
 

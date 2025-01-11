@@ -1,12 +1,17 @@
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
-
 import '../models/bmi.dart';
 
 class ApiCalls {
   Future<List<Bmi>> fetchBmi(String baseURL) async {
-    final String baseURL = 'https://fitness-api.p.rapidapi.com/fitness';
+    // Ensure that baseURL is being passed correctly
+    print("fetchBmi method called."); // Entry point confirmation
+    print("Received baseURL: $baseURL");
+
+    // Define API URL (use the passed baseURL parameter instead of redefining)
+    final String apiURL = 'https://fitness-api.p.rapidapi.com/fitness';
+    print("Using API URL: $apiURL");
+
     MapEntry<String, String> EE_Entry =
         MapEntry("totalDailyEnergyExpenditure.bmi.calories", "value");
 
@@ -23,23 +28,51 @@ class ApiCalls {
       EE_Entry.key: EE_Entry.value,
     };
 
-    var request = http.Request('POST', Uri.parse(baseURL));
-    request.bodyFields = payload;
-    request.headers.addAll(requestHeaders);
+    try {
+      print("Preparing HTTP request..."); // Debugging
+      var request = http.Request('POST', Uri.parse(apiURL));
+      request.bodyFields = payload;
+      request.headers.addAll(requestHeaders);
 
-    http.StreamedResponse response = await request.send();
+      print("Sending POST request to API...");
+      print("Request Headers: $requestHeaders");
+      print("Request Body Fields: $payload");
 
-    if (response.statusCode == 200) {
-      String ReceivedResponse = await response.stream.bytesToString();
-      List<dynamic> jsonList = jsonDecode(ReceivedResponse) as List<dynamic>;
+      http.StreamedResponse response = await request.send();
 
-      List<Bmi> bmiInfo = jsonList.map((json) => Bmi.fromJson(json)).toList();
-      return bmiInfo; //uncomment when apis are implemented in their respective pages
-      //TODO return Bmi object
-    } else {
-      throw Exception('Failed to load bmi');
+      print("Waiting for API response...");
+      if (response.statusCode == 200) {
+        print("API call successful. Status code: ${response.statusCode}");
+
+        String receivedResponse = await response.stream.bytesToString();
+        print("Raw JSON response: $receivedResponse");
+
+        try {
+          List<dynamic> jsonList =
+              jsonDecode(receivedResponse) as List<dynamic>;
+          print("Decoded JSON: $jsonList");
+
+          List<Bmi> bmiInfo =
+              jsonList.map((json) => Bmi.fromJson(json)).toList();
+          print("Parsed BMI objects: $bmiInfo");
+          return bmiInfo;
+        } catch (e) {
+          print("Error decoding JSON: $e");
+          throw Exception('Failed to decode JSON');
+        }
+      } else {
+        print("API call failed. Status code: ${response.statusCode}");
+        print("Reason: ${response.reasonPhrase}");
+        throw Exception('Failed to load BMI');
+      }
+    } catch (e) {
+      print("Exception caught: $e");
+      throw Exception('Error occurred during API call');
     }
   }
 
-  void fetchBurnedCalories() {} //still have yet to do
+  void fetchBurnedCalories() {
+    print("fetchBurnedCalories method called."); // Debugging placeholder
+    // TODO: Implement fetchBurnedCalories logic
+  }
 }
