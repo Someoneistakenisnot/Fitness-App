@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../models/bmi.dart';
+import '../utilities/api_calls.dart';
 import '../utilities/firebase_calls.dart';
 import '../widgets/navigation_bar.dart';
 
@@ -10,8 +13,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<String> Bmidata = [];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,10 +29,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       bottomNavigationBar: MyBottomNavigationBar(selectedIndexNavBar: 0),
-      // body: SafeArea(
-      //   child: FutureBuilder<List<Bmi>>(future: fetchBmi(), builder: (context)),
-      //   //TO DO widget to show show bmi, bmiConclusion, ideal body weight, body fat and daily energy expenditure
-      // ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Text('Welcome ${auth.currentUser?.displayName}'),
+            //TODO widget to show show bmi, bmiConclusion, ideal body weight, body fat and daily energy expenditure
+          ],
+        ),
+      ),
     );
   }
 }
