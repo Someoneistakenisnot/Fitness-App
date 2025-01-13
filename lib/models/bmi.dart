@@ -13,5 +13,14 @@ class Bmi {
     required this.totalDailyEE,
   });
 
-  //TODO implement Bmi.fromJson
+  factory Bmi.fromJson(Map<String, dynamic> json) {
+    return Bmi(
+      bmi: json['bmi'],
+      bmiConclusion: json['bmiConclusion'],
+      idealBodyWt: json['idealBodyWt'],
+      bodyFatPercent: json['bodyFatPercent'],
+      totalDailyEE: json['totalDailyEE'],
+    );
+  }
+//TODO implement Bmi.fromJson
 }
