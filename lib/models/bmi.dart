@@ -22,5 +22,5 @@ class Bmi {
       totalDailyEE: json['totalDailyEE'],
     );
   }
-//TODO implement Bmi.fromJson
+  //TODO implement Bmi.fromJson
 }

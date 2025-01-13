@@ -12,7 +12,8 @@ class ApiCalls {
 
     Map<String, String> requestHeaders = {
       'X-RapidAPI-Host': 'fitness-api.p.rapidapi.com',
-      'X-RapidAPI-Key': 'c93f0e349bmsh4f90f71e75907a8p166d42jsne574e84b3e47',
+      'X-RapidAPI-Key':
+          'c93f0e349bmsh4f90f71e75907a8p166d42jsne574e84b3e47', //TODO
       'Content-Type': 'application/x-www-form-urlencoded',
     };
 
