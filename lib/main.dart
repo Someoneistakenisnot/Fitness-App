@@ -6,7 +6,6 @@ import '../screens/login_screen.dart';
 import '../screens/home_screen.dart';
 import '../screens/exercise_screen.dart';
 import '../screens/update_fitness_user_screen.dart';
-import '../screens/game.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,7 +29,6 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomeScreen(),
         '/exercise': (context) => const ExerciseScreen(),
         '/user': (context) => const UpdateFitnessUserScreen(),
-        '/game': (context) => const GameScreen(),
       },
     );
   }
