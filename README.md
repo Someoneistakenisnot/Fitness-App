@@ -1,6 +1,6 @@
 # fitness
 
-A new Flutter project.
+IDK
 
 ## Getting Started
 

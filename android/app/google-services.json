@@ -26,9 +26,9 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:686424720942:android:7a2fe30fd5bd7324f201bf",
+        "mobilesdk_app_id": "1:686424720942:android:44e7d04b416ad6bcf201bf",
         "android_client_info": {
-          "package_name": "com.example.fitness2"
+          "package_name": "com.example.fitness"
         }
       },
       "oauth_client": [],
