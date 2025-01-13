@@ -1,11 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
+import 'package:flutter/material.dart';
 
-import '../screens/login_screen.dart';
-import '../screens/home_screen.dart';
 import '../screens/exercise_screen.dart';
+import '../screens/game.dart';
+import '../screens/home_screen.dart';
+import '../screens/login_screen.dart';
 import '../screens/update_fitness_user_screen.dart';
+import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomeScreen(),
         '/exercise': (context) => const ExerciseScreen(),
         '/user': (context) => const UpdateFitnessUserScreen(),
+        '/games': (context) => const GameScreen(),
       },
     );
   }
