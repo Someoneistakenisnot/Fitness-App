@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiCalls {
-<<<<<<< HEAD
+
   Future<List<Bmi>> fetchBmi(String baseURL) async {
     const String baseURL = 'https://fitness-api.p.rapidapi.com/fitness';
     MapEntry<String, String> EE_Entry =
@@ -31,13 +31,12 @@ class ApiCalls {
     http.StreamedResponse response = await request.send();
 
     if (response.statusCode == 200) {
-<<<<<<< HEAD
+
       String ReceivedResponse = await response.stream.bytesToString();
       List<dynamic> jsonList = jsonDecode(ReceivedResponse) as List<dynamic>;
       List<Bmi> bmiInfo = jsonList.map((json) => Bmi.fromJson(json)).toList();
       return bmiInfo; //uncomment when apis are implemented in their respective pages
       //TO DO return bmi data
-=======
       //TODO return Bmi object
 >>>>>>> 0a7a60136f2d78c788e6765098884e9d16dbfed2
     } else {

@@ -13,7 +13,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-<<<<<<< HEAD
+
   List<String> Bmidata = [];
   late Future<List<Bmi>> BmiFS;
 
@@ -84,16 +84,8 @@ class _HomeScreenState extends State<HomeScreen> {
         //TODO widget to show show bmi, bmiConclusion, ideal body weight, body fat and daily energy expenditure
       ),
       bottomNavigationBar: MyBottomNavigationBar(selectedIndexNavBar: 0),
-<<<<<<< HEAD
+
 =======
-      body: SafeArea(
-        child: Column(
-          children: [
-            Text('Welcome ${auth.currentUser?.displayName}'),
-            //TODO widget to show show bmi, bmiConclusion, ideal body weight, body fat and daily energy expenditure
-          ],
-        ),
-      ),
 >>>>>>> 0a7a60136f2d78c788e6765098884e9d16dbfed2
     );
   }
