@@ -1,6 +1,6 @@
 # fitness
 
-IDK
+This is a space for shitpost
 
 ## Getting Started
 
