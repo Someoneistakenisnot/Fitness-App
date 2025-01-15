@@ -33,6 +33,18 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           children: [
             Text('Welcome ${auth.currentUser?.displayName}'),
+            FutureBuilder<Bmi>(
+                future: fetchBmi(),
+                builder: (context, snapshots) {
+                  if (snapshots.hasData) {
+                    final Bmi bmi = snapshots.data!;
+                    return Container();
+                  } else if (snapshots.hasError) {
+                    return Text('${snapshots.error}');
+                  }
+                  return CircularProgressIndicator();
+                },
+            ),
             //TODO widget to show show bmi, bmiConclusion, ideal body weight, body fat and daily energy expenditure
           ],
         ),
