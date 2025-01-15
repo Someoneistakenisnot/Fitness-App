@@ -14,10 +14,12 @@ class UpdateFitnessUserScreen extends StatefulWidget {
 }
 
 class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
-  //TODO add gender, age, exercise throughout this screen
 
   TextEditingController weightController = TextEditingController();
   TextEditingController heightController = TextEditingController();
+  TextEditingController genderController = TextEditingController();
+  TextEditingController ageController = TextEditingController();
+  TextEditingController exerciseController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +37,9 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                   QueryDocumentSnapshot doc = snapshot.data!.docs[0];
                   weightController.text = doc.get('weight').toString();
                   heightController.text = doc.get('height').toString();
+                  genderController.text = doc.get('gender').toString();
+                  ageController.text = doc.get('age').toString();
+                  exerciseController.text = doc.get('exercise').toString();
                 }
               }
               return Column(
@@ -54,12 +59,30 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                     decoration: const InputDecoration(labelText: 'Height'),
                     controller: heightController,
                   ),
+                  TextField(
+                    textAlign: TextAlign.center,
+                    decoration: const InputDecoration(labelText: 'Gender'),
+                    controller: genderController,
+                  ),
+                  TextField(
+                    textAlign: TextAlign.center,
+                    decoration: const InputDecoration(labelText: 'Age'),
+                    controller: ageController,
+                  ),
+                  TextField(
+                    textAlign: TextAlign.center,
+                    decoration: const InputDecoration(labelText: 'Exercise Level'),
+                    controller: exerciseController,
+                  ),
                   ElevatedButton(
                     child: const Text('Save'),
                     onPressed: () async {
-                      fitnessUser = FitnessUser(
+                      FitnessUser fitnessUser = FitnessUser(
                         weight: int.parse(weightController.text),
                         height: int.parse(heightController.text),
+                        gender: genderController.text,
+                        age: int.parse(ageController.text),
+                        exercise: exerciseController.text,
                       );
                       await FirebaseCalls().updateFitnessUser(fitnessUser);
                       Navigator.pushReplacementNamed(context, '/home');
@@ -74,3 +97,4 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
     );
   }
 }
+

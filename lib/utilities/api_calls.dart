@@ -1,3 +1,4 @@
+import '../models/fitness_user.dart';
 import '../models/bmi.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -54,4 +55,6 @@ class ApiCalls {
       throw Exception('Failed to load BMI');
     }
   }
+
+  void fetchBurnedCalories() {}
 }

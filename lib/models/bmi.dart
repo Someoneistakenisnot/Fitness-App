@@ -14,7 +14,8 @@ class Bmi {
   });
 
   //TODO implement Bmi.fromJson
-  factory Bmi.fromJson(Map<String, dynamic> json) {
+  factory Bmi.fromJson(Map<String, dynamic> json){
+
     print(json['bodyMassIndex']['value']);
     print(json['bodyMassIndex']['conclusion']);
     print(json['idealBodyWeight']['peterson']['metric']['value']);
@@ -26,8 +27,7 @@ class Bmi {
       bmiConclusion: json['bodyMassIndex']['conclusion'],
       idealBodyWt: json['idealBodyWeight']['peterson']['metric']['value'],
       bodyFatPercent: json['bodyFatPercentage']['bmi']['value'],
-      totalDailyEE: json['totalDailyEnergyExpenditure']['bmi']['calories']
-          ['value'],
+      totalDailyEE: json['totalDailyEnergyExpenditure']['bmi']['calories']['value'],
     );
   }
 }
