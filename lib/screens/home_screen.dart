@@ -50,15 +50,30 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Text('Error: ${snapshot.error}'),
                     );
                   } else if (snapshot.hasData) {
-                    return ListView.builder(
-                      padding: const EdgeInsets.all(8.0),
-                      itemCount: _apiCalls.debugLog.length,
-                      itemBuilder: (context, index) {
-                        return Text(_apiCalls.debugLog[index]);
-                      },
+                    final bmi = snapshot.data!;
+                    return Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('BMI: ${bmi.bmi.toStringAsFixed(1)}',
+                              style: const TextStyle(fontSize: 18)),
+                          Text('Conclusion: ${bmi.bmiConclusion}',
+                              style: const TextStyle(fontSize: 18)),
+                          Text(
+                              'Ideal Body Weight: ${bmi.idealBodyWt.toStringAsFixed(1)} Kg',
+                              style: const TextStyle(fontSize: 18)),
+                          Text(
+                              'Body Fat: ${bmi.bodyFatPercent.toStringAsFixed(1)}%',
+                              style: const TextStyle(fontSize: 18)),
+                          Text(
+                              'Daily Energy Expenditure: ${bmi.totalDailyEE} Kcal',
+                              style: const TextStyle(fontSize: 18)),
+                        ],
+                      ),
                     );
                   }
-                  return const Text('Unexpected error occurred.');
+                  return const Center(child: Text('No data available.'));
                 },
               ),
             ),
