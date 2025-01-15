@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/bmi.dart';
 import '../utilities/api_calls.dart';
-import '../utilities/firebase_calls.dart';
 import '../widgets/navigation_bar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,16 +13,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<String> Bmidata = [];
-  late Future<List<Bmi>> BmiFS;
-
-  @override
-  void initState() {
-    super.initState();
-    ApiCalls apiCalls = ApiCalls(); // Create an instance of ApiCalls
-    BmiFS = apiCalls.fetchBmi(
-        'https://fitness-api.p.rapidapi.com/fitness'); // Call fetchBmi
-  }
+  final ApiCalls _apiCalls = ApiCalls();
+  final FirebaseAuth auth =
+      FirebaseAuth.instance; // Define FirebaseAuth instance
 
   @override
   Widget build(BuildContext context) {
@@ -40,43 +33,50 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: SafeArea(
-        child: FutureBuilder<List<Bmi>>(
-          future: BmiFS,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return ListView.builder(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  Bmi someBmiData = snapshot.data![index];
-                  return Card(
-                    margin: EdgeInsets.all(8.0),
-                    child: ListTile(
-                      title: Text(
-                          'Welcome Adam'), //need to implement firebase authentication here to display user name
-                      subtitle: Column(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Welcome ${auth.currentUser?.displayName ?? "User"}'),
+            Expanded(
+              child: FutureBuilder<Bmi>(
+                future: _apiCalls.fetchBmi(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text('Error: ${snapshot.error}'),
+                    );
+                  } else if (snapshot.hasData) {
+                    final bmi = snapshot.data!;
+                    return Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          Text('BMI: ${bmi.bmi.toStringAsFixed(1)}',
+                              style: const TextStyle(fontSize: 18)),
+                          Text('Conclusion: ${bmi.bmiConclusion}',
+                              style: const TextStyle(fontSize: 18)),
                           Text(
-                              'Your BMI is ${someBmiData.bmi.toStringAsFixed(1)}'),
-                          Text('You are ${someBmiData.bmiConclusion}'),
+                              'Ideal Body Weight: ${bmi.idealBodyWt.toStringAsFixed(1)} Kg',
+                              style: const TextStyle(fontSize: 18)),
                           Text(
-                              'Ideal body weight is ${someBmiData.idealBodyWt.toStringAsFixed(1)} kg'),
+                              'Body Fat: ${bmi.bodyFatPercent.toStringAsFixed(1)}%',
+                              style: const TextStyle(fontSize: 18)),
                           Text(
-                              'Body Fat is ${someBmiData.bodyFatPercent.toStringAsFixed(1)}%'),
-                          Text(
-                              'Total Daily Energy Expenditure is ${someBmiData.totalDailyEE} kcals'),
+                              'Daily Energy Expenditure: ${bmi.totalDailyEE} Kcal',
+                              style: const TextStyle(fontSize: 18)),
                         ],
                       ),
-                    ),
-                  );
+                    );
+                  }
+                  return const Center(child: Text('No data available.'));
                 },
-              );
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            }
-            return const CircularProgressIndicator();
-          },
+              ),
+            ),
+          ],
         ),
         //TODO widget to show show bmi, bmiConclusion, ideal body weight, body fat and daily energy expenditure
       ),

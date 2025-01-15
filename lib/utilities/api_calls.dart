@@ -1,3 +1,4 @@
+import '../models/bmi.dart';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -6,42 +7,55 @@ import 'package:http/http.dart' as http;
 import '../models/bmi.dart';
 
 class ApiCalls {
-  Future<List<Bmi>> fetchBmi(String baseURL) async {
-    const String baseURL = 'https://fitness-api.p.rapidapi.com/fitness';
-    MapEntry<String, String> EE_Entry =
-        MapEntry("totalDailyEnergyExpenditure.bmi.calories", "value");
+  final List<String> debugLog = [];
 
+  Future<Bmi> fetchBmi() async {
+    String baseURL = 'https://fitness-api.p.rapidapi.com/fitness';
+
+    // Request headers
     Map<String, String> requestHeaders = {
       'X-RapidAPI-Host': 'fitness-api.p.rapidapi.com',
-      'X-RapidAPI-Key':
-          'c93f0e349bmsh4f90f71e75907a8p166d42jsne574e84b3e47', //TODO
+      'X-RapidAPI-Key': "50a01b3ffamshc8df8f41d92e983p1bab6fjsneb8c0e60c5ad",
       'Content-Type': 'application/x-www-form-urlencoded',
     };
 
+    // Hardcoded payload
     Map<String, String> payload = {
-      "bodyMassIndex": "conclusion, value",
-      "idealBodyWeight.peterson.metric": "value",
-      "bodyFatPercentage.bmi": "value",
-      EE_Entry.key: EE_Entry.value,
-      //TODO Add API request parameters
+      'weight': '90',
+      'height': '190',
+      'age': '30',
+      'gender': 'male',
+      'exercise': 'little',
     };
 
-    var request = http.Request('POST', Uri.parse(baseURL));
-    request.bodyFields = payload;
-    request.headers.addAll(requestHeaders);
+    debugLog.add('Sending POST request to $baseURL');
+    debugLog.add('Headers: $requestHeaders');
+    debugLog.add('Payload: $payload');
 
-    http.StreamedResponse response = await request.send();
+    // HTTP POST request
+    var response = await http.post(
+      Uri.parse(baseURL),
+      headers: requestHeaders,
+      body: payload,
+    );
 
     if (response.statusCode == 200) {
-      String ReceivedResponse = await response.stream.bytesToString();
-      Map<String, dynamic> jsonMap = jsonDecode(ReceivedResponse);
-      Bmi bmiInfo = Bmi.fromJson(jsonMap);
-      return [bmiInfo];
-      //TODO return Bmi object
+      try {
+        // Decode JSON response
+        Map<String, dynamic> jsonMap = jsonDecode(response.body);
+        debugLog.add('Response: $jsonMap');
+
+        // Parse into Bmi object
+        Bmi bmiInfo = Bmi.fromJson(jsonMap);
+        return bmiInfo;
+      } catch (e) {
+        debugLog.add('Error decoding JSON: $e');
+        throw Exception('Failed to parse BMI data');
+      }
     } else {
-      throw Exception('Failed to load bmi data.');
+      debugLog.add('Failed to load BMI. Status code: ${response.statusCode}');
+      debugLog.add('Response body: ${response.body}');
+      throw Exception('Failed to load BMI');
     }
   }
-
-  void fetchBurnedCalories() {}
 }
