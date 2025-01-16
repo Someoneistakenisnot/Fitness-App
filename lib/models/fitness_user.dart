@@ -3,7 +3,7 @@ class FitnessUser {
   int height;
   String gender;
   int age;
-  String exercise_level;
+  String exercise;
 
   //TODO add gender, age, exercise_level
 
@@ -12,6 +12,6 @@ class FitnessUser {
     required this.height,
     required this.gender,
     required this.age,
-    required this.exercise_level,
+    required this.exercise,
   });
 }

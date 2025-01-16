@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 import '../models/bmi.dart';
 import '../utilities/api_calls.dart';
+import '../utilities/firebase_calls.dart';
 import '../widgets/navigation_bar.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,9 +13,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final ApiCalls _apiCalls = ApiCalls();
-  final FirebaseAuth auth =
-      FirebaseAuth.instance; // Define FirebaseAuth instance
+  final ApiCalls apiCalls = ApiCalls();
 
   @override
   Widget build(BuildContext context) {
@@ -34,12 +32,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Welcome ${auth.currentUser?.displayName ?? "User"}'),
+            Text('Welcome ${auth.currentUser?.displayName}'),
             Expanded(
               child: FutureBuilder<Bmi>(
-                future: _apiCalls.fetchBmi(),
+                future: apiCalls.fetchBmi(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -55,19 +52,33 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('BMI: ${bmi.bmi.toStringAsFixed(1)}',
-                              style: const TextStyle(fontSize: 18)),
-                          Text('Conclusion: ${bmi.bmiConclusion}',
-                              style: const TextStyle(fontSize: 18)),
+                          Text('Your BMI is ${bmi.bmi.toStringAsFixed(1)}',
+                            style: const TextStyle(
+                                fontSize: 12
+                            ),
+                          ),
+                          Text('You are in the ${bmi.bmiConclusion} BMI range',
+                            style: const TextStyle(
+                                fontSize: 12
+                            ),
+                          ),
+                          Text('Your ideal Body Weight is ${bmi.idealBodyWt.toStringAsFixed(1)} Kg',
+                            style: const TextStyle(
+                                fontSize: 12
+                            ),
+                          ),
                           Text(
-                              'Ideal Body Weight: ${bmi.idealBodyWt.toStringAsFixed(1)} Kg',
-                              style: const TextStyle(fontSize: 18)),
+                            'You have ${bmi.bodyFatPercent.toStringAsFixed(1)}% Body Fat',
+                            style: const TextStyle(
+                                fontSize: 12
+                            ),
+                          ),
                           Text(
-                              'Body Fat: ${bmi.bodyFatPercent.toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 18)),
-                          Text(
-                              'Daily Energy Expenditure: ${bmi.totalDailyEE} Kcal',
-                              style: const TextStyle(fontSize: 18)),
+                            'Your Total Daily Energy Expenditure is ${bmi.totalDailyEE} Kcal',
+                            style: const TextStyle(
+                                fontSize: 12
+                            ),
+                          ),
                         ],
                       ),
                     );
@@ -76,6 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
             ),
+            //TODO widget to show show bmi, bmiConclusion, ideal body weight, body fat and daily energy expenditure
           ],
         ),
         //TODO widget to show show bmi, bmiConclusion, ideal body weight, body fat and daily energy expenditure
