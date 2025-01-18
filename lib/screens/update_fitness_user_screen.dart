@@ -201,16 +201,13 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
             items: options
                 .map(
                   (option) => DropdownMenuItem(
-                    value: option,
-                    child: Text(option),
-                  ),
-                )
+                value: option,
+                child: Text(option),
+              ),
+            )
                 .toList(),
             onChanged: (newValue) {
-              // Ensure the onChanged callback works correctly
-              if (newValue != null) {
-                onChanged(newValue);
-              }
+              onChanged(newValue);
             },
           ),
         ),
