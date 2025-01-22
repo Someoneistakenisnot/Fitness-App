@@ -1,6 +1,6 @@
 # fitness
 
-This is a space for shitpost
+This is a flutter project for a fitness app.
 
 ## Getting Started
 
