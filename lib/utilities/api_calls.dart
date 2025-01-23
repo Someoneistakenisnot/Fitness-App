@@ -1,10 +1,8 @@
-import '../models/fitness_user.dart';
-import '../models/bmi.dart';
 import 'dart:convert';
 
+import 'package:fitness/models/exercise.dart';
 import 'package:http/http.dart' as http;
 
-// import '../models/fitness_user.dart';
 import '../models/bmi.dart';
 
 class ApiCalls {
@@ -60,5 +58,37 @@ class ApiCalls {
     }
   }
 
-  void fetchBurnedCalories() {}
+  Future<Exercise> fetchBurnedCalories() async {
+    const baseURL =
+        "https://calories-burned-by-api-ninjas.p.rapidapi.com/v1/caloriesburned";
+
+    Map<String, String> requestHeaders = {
+      'X-RapidAPI-Key': 'c93f0e349bmsh4f90f71e75907a8p166d42jsne574e84b3e47',
+      'X-RapidAPI-Host': 'calories-burned-by-api-ninjas.p.rapidapi.com'
+    };
+
+    Map<String, String> queryParams = {
+      //TODO Add query parameters
+      'activities': 'skiing',
+    };
+
+    //DO NOT EDIT
+    String queryString = Uri(queryParameters: queryParams).query;
+    final response = await http.get(
+      Uri.parse(baseURL + '?' + queryString),
+      headers: requestHeaders,
+    );
+
+    if (response.statusCode == 200) {
+      // Map<String, dynamic> jsonData = jsonDecode(response.body);
+      // // List<dynamic> jsonList = jsonData as List<dynamic>;
+      // // print(jsonList);
+      // // List<Exercise> exercises =
+      // //     jsonList.map((json) => Exercise.fromJson(json)).toList();
+      // return jsonData;
+      return Exercise.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to load exercises');
+    }
+  }
 }

@@ -130,3 +130,29 @@ const TextStyle kBusTitle = TextStyle(
 
 // Other constants
 const double kPadding = 14.0;
+
+const kActivityTextFieldInputDecoration = InputDecoration(
+  filled: true,
+  fillColor: Colors.white,
+  hintText: 'Enter activity name',
+  hintStyle: TextStyle(color: Colors.grey),
+  border: OutlineInputBorder(
+    borderRadius: BorderRadius.all(
+      Radius.circular(10.0),
+    ),
+    borderSide: BorderSide.none,
+  ),
+);
+
+const kDurationTextFieldInputDecoration = InputDecoration(
+  filled: true,
+  fillColor: Colors.white,
+  hintText: 'Enter duration (in minutes)',
+  hintStyle: TextStyle(color: Colors.grey),
+  border: OutlineInputBorder(
+    borderRadius: BorderRadius.all(
+      Radius.circular(10.0),
+    ),
+    borderSide: BorderSide.none,
+  ),
+);

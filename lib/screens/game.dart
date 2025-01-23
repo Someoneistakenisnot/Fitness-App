@@ -1,8 +1,10 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
-import '../widgets/navigation_bar.dart';
+
 import '../utilities/constants.dart';
 import '../utilities/firebase_calls.dart';
-import 'dart:math';
+import '../widgets/navigation_bar.dart';
 
 class GameScreen extends StatefulWidget {
   const GameScreen({super.key});
@@ -72,7 +74,7 @@ class _GameScreenState extends State<GameScreen> {
       appBar: AppBar(
         backgroundColor: Color(0xFF5E60CE).withOpacity(0.85),
         title: Text(
-          "LionTransport".toUpperCase(),
+          "Games",
           style: kAppName,
         ),
         actions: [

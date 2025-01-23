@@ -1,9 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fitness/models/exercise.dart';
+import 'package:fitness/utilities/firebase_calls.dart';
 import 'package:flutter/material.dart';
 
-import '../widgets/navigation_bar.dart';
 import '../screens/add_exercise_screen.dart';
-import '../utilities/firebase_calls.dart';
+import '../widgets/navigation_bar.dart';
 
 class ExerciseScreen extends StatefulWidget {
   const ExerciseScreen({Key? key}) : super(key: key);
@@ -13,14 +13,32 @@ class ExerciseScreen extends StatefulWidget {
 }
 
 class _ExerciseScreenState extends State<ExerciseScreen> {
+  List<Exercise> exercises = [];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: MyBottomNavigationBar(selectedIndexNavBar: 1),
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             //TODO StreamBuilder to show documents in exercises collection
+            // StreamBuilder<QuerySnapshot>(
+            //   stream: exercisesCollection
+            //       .where('userid', isEqualTo: auth.currentUser?.uid)
+            //       .snapshots(),
+            //   builder: (context, snapshot) {
+            //     if (snapshot.hasData) {
+            //       return Text(
+            //         '${snapshot.data?.docs.length} Tasks',
+            //         style: const TextStyle(color: Colors.white, fontSize: 18),
+            //       );
+            //     } else {
+            //       return const Center(child: CircularProgressIndicator());
+            //     }
+            //   },
+            // ),
             ElevatedButton(
               onPressed: () {
                 showModalBottomSheet(

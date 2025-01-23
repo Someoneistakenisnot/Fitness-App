@@ -1,9 +1,11 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitness/models/exercise.dart';
 
 import '../models/fitness_user.dart';
 
 late FitnessUser fitnessUser;
+late Exercise exerciseinfo;
 bool newUser = false;
 
 FirebaseAuth auth = FirebaseAuth.instance;
@@ -72,7 +74,48 @@ class FirebaseCalls {
     }
   }
 
-  void addExercise() {
+  Future<Exercise> getExercise(String uid) async {
+    QuerySnapshot querySnap =
+        await exercisesCollection.where('userid', isEqualTo: uid).get();
+
+    if (querySnap.docs.isNotEmpty) {
+      QueryDocumentSnapshot doc = querySnap.docs[0];
+      exerciseinfo = Exercise(
+          activity: doc.get('activity'),
+          duration: doc.get('duration'),
+          burnedCalories: doc.get('burnedCalories'));
+    } else {
+      newUser = true;
+      exerciseinfo = Exercise(
+        activity: '',
+        duration: 0,
+        burnedCalories: 0,
+      );
+    }
+    return exerciseinfo;
+  }
+
+  Future<void> addExercise(Exercise exercises) async {
     //TODO Add newExercise to exercises collection
+    QuerySnapshot querySnap = await exercisesCollection
+        .where('userid', isEqualTo: auth.currentUser?.uid)
+        .get();
+
+    if (querySnap.docs.isNotEmpty) {
+      //Existing user
+      QueryDocumentSnapshot doc = querySnap.docs[0];
+      await doc.reference.update({
+        'activity': exerciseinfo.activity,
+        'duration': exerciseinfo.duration,
+        'burnedCalories': exerciseinfo.burnedCalories,
+      });
+    } else {
+      //New user
+      await exercisesCollection.add({
+        'activity': exerciseinfo.activity,
+        'duration': exerciseinfo.duration,
+        'burnedCalories': exerciseinfo.burnedCalories,
+      });
+    }
   }
 }
