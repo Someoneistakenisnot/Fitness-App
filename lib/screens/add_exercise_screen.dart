@@ -107,13 +107,20 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
             // TODO ElevatedButton for ApiCalls().fetchBurnedCalories() and FirebaseCalls().addExercise()
             Center(
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                ),
                 onPressed: () async {
                   // Get the selected activity and duration from the controllers
-                  String Activity = activityController.text;
-                  String Duration = durationController.text;
+                  String activity = activityController.text;
+                  String duration = durationController.text;
 
                   // Validate if activity and duration are not empty
-                  if (Activity.isEmpty || Duration.isEmpty) {
+                  if (activity.isEmpty || duration.isEmpty) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                           content:
@@ -122,29 +129,26 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
                     return;
                   }
 
-                  try {
-                    // Fetch burned calories from the API
-                    Exercise exercise = await ApiCalls().fetchBurnedCalories();
+                  // Fetch burned calories from the API
+                  Exercise burnedCaloriesInfo =
+                      await ApiCalls().fetchBurnedCalories();
 
-                    // Update the exercise object with the selected activity and duration
-                    exercise.activity = Activity;
-                    exercise.duration = int.parse(Duration);
+                  // Update the exercise object with the selected activity and duration
+                  Exercise exercises = Exercise(
+                    activity: activityController.text,
+                    burnedCalories: burnedCaloriesInfo.burnedCalories,
+                    duration: int.parse(durationController.text),
+                  );
 
-                    // Save the exercise to Firestore
-                    await FirebaseCalls().addExercise(exercise);
+                  // Save the exercise to Firestore
+                  await FirebaseCalls().addExercise(exercises);
 
-                    // Show a success message
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Exercise added successfully!')),
-                    );
-                  } catch (e) {
-                    // Handle any errors that occur during the process
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to add exercise: $e')),
-                    );
-                  }
+                  // Show a success message
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Exercise added successfully!')),
+                  );
                 },
-                child: Text('Add Exercise'),
+                child: Text('ADD'),
               ),
             ),
           ],
