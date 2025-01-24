@@ -144,8 +144,8 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                       options: exerciseOptions,
                       onChanged: (value) {
                         setState(() {
-                          selectedExerciseLevel =
-                              value == 'very heavy' ? 'veryheavy' : value;
+                          // Store display value directly, handle conversion only when saving
+                          selectedExerciseLevel = value;
                         });
                       },
                     ),
@@ -161,7 +161,9 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                           height: int.parse(heightController.text),
                           gender: selectedGender!,
                           age: int.parse(ageController.text),
-                          exercise: selectedExerciseLevel!,
+                          exercise: selectedExerciseLevel == 'very heavy'
+                              ? 'veryheavy'
+                              : selectedExerciseLevel!,
                         );
 
                         await FirebaseCalls().updateFitnessUser(fitnessUser);
