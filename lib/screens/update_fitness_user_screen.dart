@@ -33,8 +33,15 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
     'heavy',
     'very heavy'
   ];
+  bool _isInitialized = false;
+  late DocumentSnapshot _initialData;
 
   @override
+  void initState() {
+    super.initState();
+    _loadInitialData();
+  }
+
   void dispose() {
     weightController.dispose();
     heightController.dispose();
@@ -45,31 +52,45 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
     super.dispose();
   }
 
+  Future<void> _loadInitialData() async {
+    final snapshot = await fitnessUsersCollection
+        .where('userid', isEqualTo: auth.currentUser?.uid)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      _initialData = snapshot.docs.first;
+      _initializeControllers();
+    }
+  }
+
+  void _initializeControllers() {
+    if (_isInitialized) return;
+
+    weightController.text = _initialData.get('weight').toString();
+    heightController.text = _initialData.get('height').toString();
+    ageController.text = _initialData.get('age').toString();
+    selectedGender = _initialData.get('gender');
+
+    final exercise = _initialData.get('exercise');
+    selectedExerciseLevel = exercise == 'veryheavy' ? 'very heavy' : exercise;
+
+    _isInitialized = true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       bottomNavigationBar: MyBottomNavigationBar(selectedIndexNavBar: 2),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: fitnessUsersCollection
-                .where('userid', isEqualTo: auth.currentUser?.uid)
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
+        child: FutureBuilder<void>(
+          future: _loadInitialData(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-              if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
-                QueryDocumentSnapshot doc = snapshot.data!.docs[0];
-                weightController.text = doc.get('weight').toString();
-                heightController.text = doc.get('height').toString();
-                selectedGender = doc.get('gender').toString();
-                ageController.text = doc.get('age').toString();
-                selectedExerciseLevel = doc.get('exercise').toString();
-              }
-
-              return Padding(
+            return SingleChildScrollView(
+              child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -144,15 +165,14 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                         );
 
                         await FirebaseCalls().updateFitnessUser(fitnessUser);
-
-                        Navigator.pushReplacementNamed(context, '/home');
+                        setState(() {});
                       },
                     ),
                   ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -201,10 +221,10 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
             items: options
                 .map(
                   (option) => DropdownMenuItem(
-                value: option,
-                child: Text(option),
-              ),
-            )
+                    value: option,
+                    child: Text(option),
+                  ),
+                )
                 .toList(),
             onChanged: (newValue) {
               onChanged(newValue);
