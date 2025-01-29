@@ -1,7 +1,5 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
-
 import '../utilities/constants.dart';
 import '../utilities/firebase_calls.dart';
 import '../widgets/navigation_bar.dart';
@@ -24,23 +22,30 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void initState() {
     super.initState();
-    _points = (_size / 10).round(); // Calculate points based on initial size
+    _updatePoints(); // Calculate points based on initial size
+  }
+
+  void _updatePoints() {
+    _points = (_size / 10).round(); // Calculate points based on size
   }
 
   void _moveButton() {
     final random = Random();
     setState(() {
+      // Move button to a random position within the screen bounds
       _top = random.nextDouble() *
               (MediaQuery.of(context).size.height * 0.65 - _size - 50) +
           10; // Leave a 10 pixel margin at the top and bottom
       _left = random.nextDouble() *
-              (MediaQuery.of(context).size.width * 1 - _size - 50) +
+              (MediaQuery.of(context).size.width - _size - 50) +
           10; // Leave a 10 pixel margin at the left and right
-      _size = (pow(random.nextDouble(), 2) * 150 + 65).clamp(40.0, 225.0)
-          as double; // Skewed random size between 75 and 225
+
+      // Generate a random size for the button
+      _size = (random.nextDouble() * 150 + 65)
+          .clamp(40.0, 225.0); // Random size between 65 and 225
       _color =
           _generateRandomColor(); // Random color excluding white/yellowish hues
-      _points = (_size / 10).round(); // Calculate points based on the size
+      _updatePoints(); // Update points based on new size
       _totalPoints += _points; // Add points to the total points
     });
   }
@@ -98,7 +103,7 @@ class _GameScreenState extends State<GameScreen> {
           children: [
             SizedBox(height: 25),
             Align(
-              alignment: Alignment.centerLeft, // or Alignment.left
+              alignment: Alignment.centerLeft,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(15, 0, 0, 0),
                 child: RichText(
@@ -129,15 +134,14 @@ class _GameScreenState extends State<GameScreen> {
             Container(
               height: MediaQuery.of(context).size.height * 0.65,
               decoration: BoxDecoration(
-                color:
-                    Colors.white, // Set the background color of the Container
-                borderRadius: BorderRadius.circular(0), // Add a rounded corner
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(0),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.withOpacity(0.5),
                     spreadRadius: 5,
                     blurRadius: 10,
-                    offset: Offset(0, 3), // Add a shadow to give depth
+                    offset: Offset(0, 3),
                   ),
                 ],
               ),
@@ -156,15 +160,13 @@ class _GameScreenState extends State<GameScreen> {
                         height: _size,
                         decoration: BoxDecoration(
                           color: _color,
-                          borderRadius: BorderRadius.circular(
-                              20), // Optional: Adds rounded corners
+                          borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.grey.withOpacity(0.5),
                               spreadRadius: 2,
                               blurRadius: 5,
-                              offset:
-                                  Offset(0, 3), // changes position of shadow
+                              offset: Offset(0, 3),
                             ),
                           ],
                         ),

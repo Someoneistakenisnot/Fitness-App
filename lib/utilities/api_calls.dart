@@ -58,7 +58,7 @@ class ApiCalls {
     }
   }
 
-  Future<Exercise> fetchBurnedCalories() async {
+  Future<Exercise> fetchBurnedCalories(String activity, int duration) async {
     const baseURL =
         "https://calories-burned-by-api-ninjas.p.rapidapi.com/v1/caloriesburned";
 
@@ -68,11 +68,11 @@ class ApiCalls {
     };
 
     Map<String, String> queryParams = {
-      //TODO Add query parameters
-      'activities': 'skiing',
+      'activities': activity,
+      'duration': duration.toString(), // Add duration as a query parameter
     };
 
-    //DO NOT EDIT
+    // DO NOT EDIT
     String queryString = Uri(queryParameters: queryParams).query;
     final response = await http.get(
       Uri.parse(baseURL + '?' + queryString),
@@ -80,15 +80,10 @@ class ApiCalls {
     );
 
     if (response.statusCode == 200) {
-      // Map<String, dynamic> jsonData = jsonDecode(response.body);
-      // // List<dynamic> jsonList = jsonData as List<dynamic>;
-      // // print(jsonList);
-      // // List<Exercise> exercises =
-      // //     jsonList.map((json) => Exercise.fromJson(json)).toList();
-      // return jsonData;
+      // Decode the JSON response and return an Exercise object
       return Exercise.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Failed to load exercises');
+      throw Exception('Failed to load burned calories');
     }
   }
 }

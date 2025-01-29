@@ -14,8 +14,20 @@ class Exercise {
     print(json['duration_minutes']);
     print(json['total_calories']);
     return Exercise(
-        activity: json['name'],
-        duration: json['duration_minutes'],
-        burnedCalories: json['total_calories']);
+      activity: json['name'],
+      duration: json['duration_minutes'],
+      burnedCalories: json['total_calories'],
+    );
+  }
+
+  factory Exercise.fromMap(Map<String, dynamic> map) {
+    return Exercise(
+      activity:
+          map['activity'] ?? '', // Provide a default value if key doesn't exist
+      duration:
+          map['duration'] ?? 0, // Provide a default value if key doesn't exist
+      burnedCalories: map['burnedCalories'] ??
+          0, // Provide a default value if key doesn't exist
+    );
   }
 }
