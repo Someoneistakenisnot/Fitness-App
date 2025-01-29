@@ -16,6 +16,17 @@ class ExerciseScreen extends StatefulWidget {
 class _ExerciseScreenState extends State<ExerciseScreen> {
   List<Exercise> exercises = [];
 
+  void _addExercise(
+      String newActivity, int newDuration, int newBurnedCalories) {
+    setState(() {
+      exercises.add(Exercise(
+        activity: newActivity,
+        duration: newDuration,
+        burnedCalories: newBurnedCalories,
+      ));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,7 +45,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                   if (snapshot.hasData) {
                     return Text(
                       '${snapshot.data?.docs.length} Exercises',
-                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                      style: const TextStyle(color: Colors.black, fontSize: 18),
                     );
                   } else {
                     return const Center(child: CircularProgressIndicator());
@@ -44,9 +55,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
             ),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: exercisesCollection
-                    .where('userid', isEqualTo: auth.currentUser?.uid)
-                    .snapshots(),
+                stream: exercisesCollection.snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.hasData) {
                     return ListView.builder(
@@ -56,15 +65,15 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                         return ListTile(
                           title: Text(
                             doc['activity'],
-                            style: const TextStyle(color: Colors.white),
+                            style: const TextStyle(color: Colors.black),
                           ),
                           subtitle: Text(
-                            doc['duration'],
-                            style: const TextStyle(color: Colors.white),
+                            doc['duration'].toString(),
+                            style: const TextStyle(color: Colors.black),
                           ),
                           trailing: Text(
-                            doc['burnedCalories'],
-                            style: const TextStyle(color: Colors.white),
+                            doc['burnedCalories'].toString(),
+                            style: const TextStyle(color: Colors.black),
                           ),
                         );
                       },
@@ -90,7 +99,9 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                             padding: EdgeInsets.only(
                                 bottom:
                                     MediaQuery.of(context).viewInsets.bottom),
-                            child: AddExerciseScreen(),
+                            child: AddExerciseScreen(
+                              addExerciseCallback: _addExercise,
+                            ),
                           ),
                         );
                       },

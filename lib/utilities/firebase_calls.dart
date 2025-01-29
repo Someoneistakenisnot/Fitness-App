@@ -4,8 +4,6 @@ import 'package:fitness/models/exercise.dart';
 
 import '../models/fitness_user.dart';
 
-late FitnessUser fitnessUser;
-late Exercise exerciseinfo;
 bool newUser = false;
 
 FirebaseAuth auth = FirebaseAuth.instance;
@@ -16,106 +14,56 @@ CollectionReference exercisesCollection =
 
 class FirebaseCalls {
   Future<FitnessUser> getFitnessUser(String uid) async {
-    QuerySnapshot querySnap =
-        await fitnessUsersCollection.where('userid', isEqualTo: uid).get();
-
-    if (querySnap.docs.isNotEmpty) {
-      QueryDocumentSnapshot doc = querySnap.docs[0];
-      fitnessUser = FitnessUser(
-        weight: doc.get('weight'),
-        height: doc.get('height'),
-        gender: doc.get('gender'),
-        age: doc.get('age'),
-        exercise: doc.get('exercise'),
-        //TODO add gender, age, exercise
-      );
+    final doc = await fitnessUsersCollection.doc(uid).get();
+    if (doc.exists) {
+      return FitnessUser.fromMap(doc.data() as Map<String, dynamic>);
     } else {
-      newUser = true;
-      fitnessUser = FitnessUser(
+      return FitnessUser(
         weight: 0,
         height: 0,
         gender: '',
         age: 0,
         exercise: '',
-        //TODO add gender, age, exercise
       );
     }
-    return fitnessUser;
   }
 
   Future<void> updateFitnessUser(FitnessUser fitnessUser) async {
-    //check if there is an existing record of user
-    QuerySnapshot querySnap = await fitnessUsersCollection
-        .where('userid', isEqualTo: auth.currentUser?.uid)
-        .get();
+    final user = auth.currentUser;
+    if (user == null) throw Exception("User not logged in");
 
-    if (querySnap.docs.isNotEmpty) {
-      //Existing user
-      QueryDocumentSnapshot doc = querySnap.docs[0];
-      await doc.reference.update({
-        'weight': fitnessUser.weight,
-        'height': fitnessUser.height,
-        'gender': fitnessUser.gender,
-        'age': fitnessUser.age,
-        'exercise': fitnessUser.exercise,
-        //TODO add gender, age, exercise
-      });
-    } else {
-      //New user
-      await fitnessUsersCollection.add({
-        'weight': fitnessUser.weight,
-        'height': fitnessUser.height,
-        'gender': fitnessUser.gender,
-        'age': fitnessUser.age,
-        'exercise': fitnessUser.exercise,
-        //TODO add gender, age, exercise
-        'userid': auth.currentUser?.uid
-      });
-    }
+    await fitnessUsersCollection.doc(user.uid).set({
+      'weight': fitnessUser.weight,
+      'height': fitnessUser.height,
+      'gender': fitnessUser.gender,
+      'age': fitnessUser.age,
+      'exercise': fitnessUser.exercise,
+      'userid': user.uid,
+    }, SetOptions(merge: true));
   }
 
   Future<Exercise> getExercise(String uid) async {
-    QuerySnapshot querySnap =
-        await exercisesCollection.where('userid', isEqualTo: uid).get();
-
-    if (querySnap.docs.isNotEmpty) {
-      QueryDocumentSnapshot doc = querySnap.docs[0];
-      exerciseinfo = Exercise(
-          activity: doc.get('activity'),
-          duration: doc.get('duration'),
-          burnedCalories: doc.get('burnedCalories'));
+    final doc = await exercisesCollection.doc(uid).get();
+    if (doc.exists) {
+      return Exercise.fromMap(doc.data() as Map<String, dynamic>);
     } else {
-      newUser = true;
-      exerciseinfo = Exercise(
+      return Exercise(
         activity: '',
         duration: 0,
         burnedCalories: 0,
       );
     }
-    return exerciseinfo;
   }
 
   Future<void> addExercise(Exercise exercises) async {
-    //TODO Add newExercise to exercises collection
-    QuerySnapshot querySnap = await exercisesCollection
-        .where('userid', isEqualTo: auth.currentUser?.uid)
-        .get();
+    final user = auth.currentUser;
+    if (user == null) throw Exception("User not logged in");
 
-    if (querySnap.docs.isNotEmpty) {
-      //Existing user
-      QueryDocumentSnapshot doc = querySnap.docs[0];
-      await doc.reference.update({
-        'activity': exerciseinfo.activity,
-        'duration': exerciseinfo.duration,
-        'burnedCalories': exerciseinfo.burnedCalories,
-      });
-    } else {
-      //New user
-      await exercisesCollection.add({
-        'activity': exerciseinfo.activity,
-        'duration': exerciseinfo.duration,
-        'burnedCalories': exerciseinfo.burnedCalories,
-      });
-    }
+    await exercisesCollection.doc(user.uid).set({
+      'activity': exercises.activity,
+      'duration': exercises.duration,
+      'burnedCalories': exercises.burnedCalories,
+      'userid': user.uid,
+    }, SetOptions(merge: true));
   }
 }

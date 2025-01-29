@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../models/exercise.dart';
 import '../utilities/api_calls.dart';
-import '../utilities/constants.dart';
 import '../utilities/firebase_calls.dart';
 
 class AddExerciseScreen extends StatefulWidget {
+  const AddExerciseScreen({super.key, required this.addExerciseCallback});
+  final Function addExerciseCallback;
+
   @override
   State<AddExerciseScreen> createState() => _AddExerciseScreenState();
 }
@@ -42,6 +44,7 @@ List<String> activities = [
   'Table tennis',
   'Walking',
 ];
+
 List<String> durations = [
   '15',
   '30',
@@ -58,100 +61,153 @@ List<String> durations = [
 ];
 
 class _AddExerciseScreenState extends State<AddExerciseScreen> {
-  TextEditingController activityController = TextEditingController();
-  TextEditingController durationController = TextEditingController();
+  String? selectedActivity;
+  String? selectedDuration;
 
   @override
   Widget build(BuildContext context) {
-    // TODO TextField widgets for user to enter activity and duration (in mins).
-
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              style: const TextStyle(color: Colors.white),
-              decoration: kActivityTextFieldInputDecoration,
-              controller: activityController,
-            ),
-            Autocomplete<String>(
-              optionsBuilder: (value) {
-                // When the field is empty
-                if (value.text.isEmpty) {
-                  return [];
-                }
-                return activities.where(
-                  (item) =>
-                      item.toLowerCase().contains(value.text.toLowerCase()),
-                );
-              },
-            ),
-            TextField(
-              style: const TextStyle(color: Colors.white),
-              decoration: kDurationTextFieldInputDecoration,
-              controller: durationController,
-            ),
-            Autocomplete<String>(
-              optionsBuilder: (value) {
-                // When the field is empty
-                if (value.text.isEmpty) {
-                  return [];
-                }
-                return durations.where(
-                  (item) =>
-                      item.toLowerCase().contains(value.text.toLowerCase()),
-                );
-              },
-            ),
-            // TODO ElevatedButton for ApiCalls().fetchBurnedCalories() and FirebaseCalls().addExercise()
-            Center(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.black,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5.0),
-                  ),
-                ),
-                onPressed: () async {
-                  // Get the selected activity and duration from the controllers
-                  String activity = activityController.text;
-                  String duration = durationController.text;
-
-                  // Validate if activity and duration are not empty
-                  if (activity.isEmpty || duration.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content:
-                              Text('Please select an activity and duration')),
-                    );
-                    return;
-                  }
-
-                  // Fetch burned calories from the API
-                  Exercise burnedCaloriesInfo =
-                      await ApiCalls().fetchBurnedCalories();
-
-                  // Update the exercise object with the selected activity and duration
-                  Exercise exercises = Exercise(
-                    activity: activityController.text,
-                    burnedCalories: burnedCaloriesInfo.burnedCalories,
-                    duration: int.parse(durationController.text),
-                  );
-
-                  // Save the exercise to Firestore
-                  await FirebaseCalls().addExercise(exercises);
-
-                  // Show a success message
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Exercise added successfully!')),
-                  );
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Container(
+          // Add a container to constrain the height
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Dropdown for Activity
+              buildDropdownField(
+                label: 'Activity',
+                value: selectedActivity,
+                options: activities,
+                onChanged: (value) {
+                  setState(() {
+                    selectedActivity = value;
+                  });
                 },
-                child: Text('ADD'),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+
+              // Dropdown for Duration
+              buildDropdownField(
+                label: 'Duration (minutes)',
+                value: selectedDuration,
+                options: durations,
+                onChanged: (value) {
+                  setState(() {
+                    selectedDuration = value;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+
+              Center(
+                child: ElevatedButton(
+                  child: Text('ADD'),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.black,
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                  ),
+                  onPressed: () async {
+                    // Validate if activity and duration are selected
+                    if (selectedActivity == null || selectedDuration == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content:
+                                Text('Please select an activity and duration')),
+                      );
+                      return;
+                    }
+
+                    // Fetch burned calories from the API
+                    Exercise burnedCaloriesInfo = await ApiCalls()
+                        .fetchBurnedCalories(
+                            selectedActivity!, int.parse(selectedDuration!));
+
+                    // Update the exercise object with the selected activity and duration
+                    Exercise exercises = Exercise(
+                      activity: selectedActivity!,
+                      burnedCalories: burnedCaloriesInfo.burnedCalories,
+                      duration: int.parse(selectedDuration!),
+                    );
+
+                    // Save the exercise to Firestore
+                    await FirebaseCalls().addExercise(exercises);
+
+                    // Show a success message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Exercise added successfully!')),
+                    );
+
+                    // Call the callback with the correct parameters
+                    widget.addExerciseCallback(
+                        selectedActivity!,
+                        int.parse(selectedDuration!),
+                        burnedCaloriesInfo.burnedCalories);
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildTextField({
+    required String label,
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    required TextInputType inputType,
+    String? suffixText,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        focusNode: focusNode,
+        keyboardType: inputType,
+        decoration: InputDecoration(
+          labelText: label,
+          suffixText: suffixText,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+        ),
+        controller: controller,
+      ),
+    );
+  }
+
+  Widget buildDropdownField({
+    required String label,
+    required String? value,
+    required List<String> options,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<String>(
+            value: value,
+            isExpanded: true,
+            items: options
+                .map(
+                  (option) => DropdownMenuItem(
+                    value: option,
+                    child: Text(option),
+                  ),
+                )
+                .toList(),
+            onChanged: (newValue) {
+              onChanged(newValue);
+            },
+          ),
         ),
       ),
     );
