@@ -31,17 +31,6 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     });
   }
 
-  void _addExercise(
-      String newActivity, int newDuration, int newBurnedCalories) {
-    setState(() {
-      exercises.add(Exercise(
-        activity: newActivity,
-        duration: newDuration,
-        burnedCalories: newBurnedCalories,
-      ));
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,16 +51,19 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                             ?.uid) // Filter exercises by current user ID
                     .snapshots(),
                 builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return Text(
-                      '${snapshot.data?.docs.length} Exercises', // Display count of exercises
-                      style: const TextStyle(color: Colors.black, fontSize: 18),
-                    );
-                  } else {
+                  if (snapshot.hasError) {
+                    return const Center(
+                        child: Text('Error fetching exercises'));
+                  }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
                         child:
                             CircularProgressIndicator()); // Show loading indicator while fetching data
                   }
+                  return Text(
+                    '${snapshot.data?.docs.length ?? 0} Exercises', // Display count of exercises
+                    style: const TextStyle(color: Colors.black, fontSize: 18),
+                  );
                 },
               ),
             ),
@@ -80,36 +72,40 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                 stream: exercisesCollection
                     .snapshots(), // Stream to listen for exercise updates
                 builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return ListView.builder(
-                      itemCount: snapshot
-                          .data!.docs.length, // Number of exercises to display
-                      itemBuilder: (context, index) {
-                        QueryDocumentSnapshot doc = snapshot.data!
-                            .docs[index]; // Get document for each exercise
-                        return ListTile(
-                          title: Text(
-                            doc['activity'], // Display activity name
-                            style: const TextStyle(color: Colors.black),
-                          ),
-                          subtitle: Text(
-                            doc['duration']
-                                .toString(), // Display duration of the activity
-                            style: const TextStyle(color: Colors.black),
-                          ),
-                          trailing: Text(
-                            doc['burnedCalories']
-                                .toString(), // Display calories burned
-                            style: const TextStyle(color: Colors.black),
-                          ),
-                        );
-                      },
-                    );
-                  } else {
+                  if (snapshot.hasError) {
+                    return const Center(
+                        child: Text('Error fetching exercises'));
+                  }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
                         child:
                             CircularProgressIndicator()); // Show loading indicator while fetching data
                   }
+                  return ListView.builder(
+                    itemCount: snapshot
+                        .data!.docs.length, // Number of exercises to display
+                    itemBuilder: (context, index) {
+                      final QueryDocumentSnapshot doc = snapshot
+                          .data!.docs[index]; // Get document for each exercise
+                      return ListTile(
+                        title: Text(
+                          doc['activity'] ??
+                              'Unknown Activity', // Display activity name
+                          style: const TextStyle(color: Colors.black),
+                        ),
+                        subtitle: Text(
+                          doc['duration']?.toString() ??
+                              '0', // Display duration of the activity
+                          style: const TextStyle(color: Colors.black),
+                        ),
+                        trailing: Text(
+                          doc['burnedCalories']?.toString() ??
+                              '0 ', // Display calories burned
+                          style: const TextStyle(color: Colors.black),
+                        ),
+                      );
+                    },
+                  );
                 },
               ),
             ),
