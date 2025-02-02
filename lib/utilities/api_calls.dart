@@ -1,94 +1,113 @@
-import 'dart:convert';
+import 'dart:convert'; // Import for JSON encoding/decoding
 
-import 'package:fitness/models/exercise.dart';
-import 'package:http/http.dart' as http;
+import 'package:fitness/models/exercise.dart'; // Import Exercise model
+import 'package:http/http.dart'
+    as http; // Import HTTP package for making requests
 
-import '../models/bmi.dart';
+import '../models/bmi.dart'; // Import BMI model
 
+/// A class to handle API calls related to fitness data.
 class ApiCalls {
-  final List<String> debugLog = [];
+  final List<String> debugLog =
+      []; // List to store debug logs for tracking API calls
 
+  /// Fetches BMI data from the fitness API.
   Future<Bmi> fetchBmi() async {
-    String baseURL = 'https://fitness-api.p.rapidapi.com/fitness';
+    String baseURL =
+        'https://fitness-api.p.rapidapi.com/fitness'; // Base URL for the BMI API
 
-    // Request headers
+    // Request headers for the API call
     Map<String, String> requestHeaders = {
-      'X-RapidAPI-Host': 'fitness-api.p.rapidapi.com',
-      'X-RapidAPI-Key': "50a01b3ffamshc8df8f41d92e983p1bab6fjsneb8c0e60c5ad",
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-RapidAPI-Host':
+          'fitness-api.p.rapidapi.com', // Host header for RapidAPI
+      'X-RapidAPI-Key':
+          "50a01b3ffamshc8df8f41d92e983p1bab6fjsneb8c0e60c5ad", // API key for authentication
+      'Content-Type':
+          'application/x-www-form-urlencoded', // Content type for the request
     };
 
-    // Hardcoded payload
+    // Hardcoded payload with user data for BMI calculation
     Map<String, String> payload = {
-      'weight': '90',
-      'height': '190',
-      'age': '30',
-      'gender': 'male',
-      'exercise': 'little',
+      'weight': '90', // User's weight
+      'height': '190', // User's height
+      'age': '30', // User's age
+      'gender': 'male', // User's gender
+      'exercise': 'little', // User's exercise level
     };
 
+    // Log the request details for debugging
     debugLog.add('Sending POST request to $baseURL');
     debugLog.add('Headers: $requestHeaders');
     debugLog.add('Payload: $payload');
 
-    // HTTP POST request
+    // HTTP POST request to fetch BMI data
     var response = await http.post(
-      Uri.parse(baseURL),
-      headers: requestHeaders,
-      body: payload,
+      Uri.parse(baseURL), // Parse the base URL
+      headers: requestHeaders, // Set request headers
+      body: payload, // Set request body
     );
 
+    // Check if the response status is OK (200)
     if (response.statusCode == 200) {
       try {
-        // Decode JSON response
+        // Decode JSON response into a Map
         Map<String, dynamic> jsonMap = jsonDecode(response.body);
-        debugLog.add('Response: $jsonMap');
+        debugLog.add('Response: $jsonMap'); // Log the response for debugging
 
-        // Parse into Bmi object
+        // Parse the JSON map into a Bmi object
         Bmi bmiInfo = Bmi.fromJson(jsonMap);
-        return bmiInfo;
+        return bmiInfo; // Return the Bmi object
       } catch (e) {
-        debugLog.add('Error decoding JSON: $e');
-        throw Exception('Failed to parse BMI data');
+        debugLog.add('Error decoding JSON: $e'); // Log any JSON decoding errors
+        throw Exception(
+            'Failed to parse BMI data'); // Throw an exception if parsing fails
       }
     } else {
+      // Log the error if the response status is not OK
       debugLog.add('Failed to load BMI. Status code: ${response.statusCode}');
       debugLog.add('Response body: ${response.body}');
-      throw Exception('Failed to load BMI');
+      throw Exception(
+          'Failed to load BMI'); // Throw an exception for failed request
     }
   }
 
-  Future<Exercise> fetchBurnedCalories() async {
+  /// Fetches burned calories based on activity and duration.
+  Future<Exercise> fetchBurnedCalories(String activity, int duration) async {
     const baseURL =
-        "https://calories-burned-by-api-ninjas.p.rapidapi.com/v1/caloriesburned";
+        "https://calories-burned-by-api-ninjas.p.rapidapi.com/v1/caloriesburned"; // Base URL for the calories burned API
 
+    // Request headers for the API call
     Map<String, String> requestHeaders = {
-      'X-RapidAPI-Key': 'c93f0e349bmsh4f90f71e75907a8p166d42jsne574e84b3e47',
-      'X-RapidAPI-Host': 'calories-burned-by-api-ninjas.p.rapidapi.com'
+      'X-RapidAPI-Key':
+          'c93f0e349bmsh4f90f71e75907a8p166d42jsne574e84b3e47', // API key for authentication
+      'X-RapidAPI-Host':
+          'calories-burned-by-api-ninjas.p.rapidapi.com' // Host header for RapidAPI
     };
 
+    // Query parameters for the API call
     Map<String, String> queryParams = {
-      //TODO Add query parameters
-      'activities': 'skiing',
+      'activities':
+          activity, // Activity type for which calories are to be calculated
+      'duration': duration.toString(), // Duration of the activity in minutes
     };
 
-    //DO NOT EDIT
+    // Construct the query string from the query parameters
     String queryString = Uri(queryParameters: queryParams).query;
+    // HTTP GET request to fetch burned calories data
     final response = await http.get(
-      Uri.parse(baseURL + '?' + queryString),
-      headers: requestHeaders,
+      Uri.parse(
+          baseURL + '?' + queryString), // Combine base URL and query string
+      headers: requestHeaders, // Set request headers
     );
 
+    // Check if the response status is OK (200)
     if (response.statusCode == 200) {
-      // Map<String, dynamic> jsonData = jsonDecode(response.body);
-      // // List<dynamic> jsonList = jsonData as List<dynamic>;
-      // // print(jsonList);
-      // // List<Exercise> exercises =
-      // //     jsonList.map((json) => Exercise.fromJson(json)).toList();
-      // return jsonData;
-      return Exercise.fromJson(jsonDecode(response.body));
+      // Decode the JSON response and return an Exercise object
+      return Exercise.fromJson(
+          jsonDecode(response.body)); // Parse and return the Exercise object
     } else {
-      throw Exception('Failed to load exercises');
+      throw Exception(
+          'Failed to load burned calories'); // Throw an exception for failed request
     }
   }
 }

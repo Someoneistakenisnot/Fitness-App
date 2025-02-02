@@ -4,7 +4,6 @@ import '../models/bmi.dart';
 import '../utilities/api_calls.dart';
 import '../utilities/firebase_calls.dart';
 import '../widgets/navigation_bar.dart';
-import '../utilities/constants.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -41,6 +40,13 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(child: _buildBmiDetails()),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/chatbot');
+        },
+        backgroundColor: Colors.blue,
+        child: const Icon(Icons.chat),
       ),
       bottomNavigationBar: MyBottomNavigationBar(selectedIndexNavBar: 0),
     );
