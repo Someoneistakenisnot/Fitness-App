@@ -31,6 +31,17 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     });
   }
 
+  void _addExercise(
+      String newActivity, int newDuration, int newBurnedCalories) {
+    setState(() {
+      exercises.add(Exercise(
+        activity: newActivity,
+        duration: newDuration,
+        burnedCalories: newBurnedCalories,
+      ));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
