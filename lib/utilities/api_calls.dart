@@ -1,12 +1,12 @@
 import 'dart:convert'; // Import for JSON encoding/decoding
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitness/models/exercise.dart'; // Import Exercise model
 import 'package:http/http.dart'
     as http; // Import HTTP package for making requests
 
 import '../models/bmi.dart'; // Import BMI model
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// A class to handle API calls related to fitness data.
 class ApiCalls {
@@ -138,6 +138,8 @@ class ApiCalls {
       Uri.parse('$baseURL?$queryString'), // Combine base URL and query string
       headers: requestHeaders, // Set request headers
     );
+
+    print(response.body);
 
     // Check if the response status is OK (200)
     if (response.statusCode == 200) {

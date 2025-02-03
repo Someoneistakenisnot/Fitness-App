@@ -69,94 +69,91 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Container(
-            width: double.infinity,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // TextField for Activity with Autocomplete
-                _buildAutocompleteTextField(
-                  label: 'Activity',
-                  controller: activityController,
-                  options: activities,
-                  onSelected: (String selection) {
-                    setState(() {
-                      selectedActivity = selection;
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Container(
+          width: double.infinity,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // TextField for Activity with Autocomplete
+              _buildAutocompleteTextField(
+                label: 'Activity',
+                controller: activityController,
+                options: activities,
+                onSelected: (String selection) {
+                  setState(() {
+                    selectedActivity = selection;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
 
-                // TextField for Duration with Autocomplete
-                _buildAutocompleteTextField(
-                  label: 'Duration (minutes)',
-                  controller: durationController,
-                  options: durations,
-                  onSelected: (String selection) {
-                    setState(() {
-                      selectedDuration = selection;
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
+              // TextField for Duration with Autocomplete
+              _buildAutocompleteTextField(
+                label: 'Duration (minutes)',
+                controller: durationController,
+                options: durations,
+                onSelected: (String selection) {
+                  setState(() {
+                    selectedDuration = selection;
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
 
-                Center(
-                  child: ElevatedButton(
-                    child: Text('ADD'),
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.black,
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5.0),
-                      ),
+              Center(
+                child: ElevatedButton(
+                  child: Text('ADD'),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.black,
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5.0),
                     ),
-                    onPressed: () async {
-                      // Validate if activity and duration are selected
-                      if (selectedActivity == null ||
-                          selectedDuration == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(
-                                  'Please select an activity and duration')),
-                        );
-                        return;
-                      }
-
-                      // Fetch burned calories from the API
-                      Exercise burnedCaloriesInfo = await ApiCalls()
-                          .fetchBurnedCalories(
-                              selectedActivity!, int.parse(selectedDuration!));
-
-                      // Update the exercise object with the selected activity and duration
-                      Exercise exercises = Exercise(
-                        activity: selectedActivity!,
-                        burnedCalories: burnedCaloriesInfo.burnedCalories,
-                        duration: int.parse(selectedDuration!),
-                      );
-
-                      // Save the exercise to Firestore
-                      await FirebaseCalls().addExercise(exercises);
-
-                      // Show a success message
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Exercise added successfully!')),
-                      );
-
-                      // Call the callback with the correct parameters
-                      widget.addExerciseCallback(
-                          selectedActivity!,
-                          int.parse(selectedDuration!),
-                          burnedCaloriesInfo.burnedCalories);
-                      Navigator.pop(context);
-                    },
                   ),
+                  onPressed: () async {
+                    // Validate if activity and duration are selected
+                    if (selectedActivity == null || selectedDuration == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content:
+                                Text('Please select an activity and duration')),
+                      );
+                      return;
+                    }
+
+                    // Fetch burned calories from the API
+                    Exercise burnedCaloriesInfo = await ApiCalls()
+                        .fetchBurnedCalories(
+                            selectedActivity!, int.parse(selectedDuration!));
+
+                    // Update the exercise object with the selected activity and duration
+                    Exercise exercises = Exercise(
+                      activity: selectedActivity!,
+                      burnedCalories: burnedCaloriesInfo.burnedCalories,
+                      duration: int.parse(selectedDuration!),
+                    );
+
+                    // Save the exercise to Firestore
+                    await FirebaseCalls().addExercise(exercises);
+
+                    // Show a success message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Exercise added successfully!')),
+                    );
+
+                    // Call the callback with the correct parameters
+                    widget.addExerciseCallback(
+                        selectedActivity!,
+                        int.parse(selectedDuration!),
+                        burnedCaloriesInfo.burnedCalories);
+                    Navigator.pop(context);
+                  },
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
