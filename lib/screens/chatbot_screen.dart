@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:math';
 
 import '../models/message.dart';
 import '../utilities/firebase_calls.dart';
@@ -14,6 +15,7 @@ class ChatBotScreen extends StatefulWidget {
 class _ChatBotScreenState extends State<ChatBotScreen> {
   final List<Message> _messages = [];
   final TextEditingController _textController = TextEditingController();
+  final Random _random = Random();
 
   String _formatTimestamp(DateTime timestamp) {
     return DateFormat('MMM d, y • HH:mm').format(timestamp);
@@ -30,7 +32,9 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
       ));
     });
 
-    Future.delayed(const Duration(seconds: 1), () {
+    int delayInSeconds = _random.nextInt(5) + 1;
+
+    Future.delayed(Duration(seconds: delayInSeconds), () {
       setState(() {
         _messages.add(Message(
           text: _getBotResponse(text),
