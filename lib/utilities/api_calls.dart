@@ -5,6 +5,8 @@ import 'package:http/http.dart'
     as http; // Import HTTP package for making requests
 
 import '../models/bmi.dart'; // Import BMI model
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// A class to handle API calls related to fitness data.
 class ApiCalls {
@@ -13,6 +15,40 @@ class ApiCalls {
 
   /// Fetches BMI data from the fitness API.
   Future<Bmi> fetchBmi() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('User not authenticated. Please log in.');
+    }
+
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('fitnessUsers')
+        .where('userid', isEqualTo: user.uid)
+        .get();
+
+    if (querySnapshot.docs.isEmpty) {
+      throw Exception('User data not found. Please update your profile.');
+    }
+
+    DocumentSnapshot doc = querySnapshot.docs.first;
+    Map<String, dynamic> userData = doc.data() as Map<String, dynamic>;
+
+    // Validate required fields
+    if (userData['weight'] == null ||
+        userData['height'] == null ||
+        userData['age'] == null ||
+        userData['gender'] == null ||
+        userData['exercise'] == null) {
+      throw Exception('Incomplete user data. Please update your profile.');
+    }
+
+    String weight = userData['weight'].toString();
+    String height = userData['height'].toString();
+    String age = userData['age'].toString();
+    String gender = userData['gender'];
+    String exercise = userData['exercise'] == 'veryheavy'
+        ? 'very heavy'
+        : userData['exercise'];
+
     const String baseURL =
         'https://fitness-api.p.rapidapi.com/fitness'; // Base URL for the BMI API
 
@@ -27,12 +63,17 @@ class ApiCalls {
     };
 
     // Hardcoded payload with user data for BMI calculation
-    const Map<String, String> payload = {
-      'weight': '90', // User's weight
-      'height': '190', // User's height
-      'age': '30', // User's age
-      'gender': 'male', // User's gender
-      'exercise': 'little', // User's exercise level
+    Map<String, String> payload = {
+      'weight': weight,
+      'height': height,
+      'age': age,
+      'gender': gender,
+      'exercise': exercise,
+      // 'weight': '90', // User's weight
+      // 'height': '190', // User's height
+      // 'age': '30', // User's age
+      // 'gender': 'male', // User's gender
+      // 'exercise': 'little', // User's exercise level
     };
 
     // Log the request details for debugging
