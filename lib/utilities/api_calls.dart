@@ -114,41 +114,46 @@ class ApiCalls {
   /// Fetches burned calories based on activity and duration.
   Future<Exercise> fetchBurnedCalories(String activity, int duration) async {
     const String baseURL =
-        "https://calories-burned-by-api-ninjas.p.rapidapi.com/v1/caloriesburned"; // Base URL for the calories burned API
+        "https://calories-burned-by-api-ninjas.p.rapidapi.com/v1/caloriesburned";
 
     // Request headers for the API call
     const Map<String, String> requestHeaders = {
-      'X-RapidAPI-Key': 'YOUR_API_KEY_HERE', // Replace with your API key
-      'X-RapidAPI-Host':
-          'calories-burned-by-api-ninjas.p.rapidapi.com' // Host header for RapidAPI
+      'X-RapidAPI-Key': 'YOUR_API_KEY_HERE',
+      'X-RapidAPI-Host': 'calories-burned-by-api-ninjas.p.rapidapi.com'
     };
 
     // Query parameters for the API call
     final Map<String, String> queryParams = {
-      'activities':
-          activity, // Activity type for which calories are to be calculated
-      'duration': duration.toString(), // Duration of the activity in minutes
+      'activities': activity,
+      'duration': duration.toString(),
     };
 
-    // Construct the query string from the query parameters
     final String queryString = Uri(queryParameters: queryParams).query;
 
-    // HTTP GET request to fetch burned calories data
+    debugLog.add('Sending GET request to $baseURL?$queryString');
+    debugLog.add('Headers: $requestHeaders');
+
     final response = await http.get(
-      Uri.parse('$baseURL?$queryString'), // Combine base URL and query string
-      headers: requestHeaders, // Set request headers
+      Uri.parse('$baseURL?$queryString'),
+      headers: requestHeaders,
     );
 
-    print(response.body);
+    debugLog.add('Response status: ${response.statusCode}');
+    debugLog.add('Response body: ${response.body}');
 
-    // Check if the response status is OK (200)
+    print(response.body);  // Print raw response body to console
+
     if (response.statusCode == 200) {
-      // Decode the JSON response and return an Exercise object
-      return Exercise.fromJson(
-          jsonDecode(response.body)); // Parse and return the Exercise object
+      try {
+        final jsonData = jsonDecode(response.body);
+        debugLog.add('Decoded response: $jsonData');
+        return Exercise.fromJson(jsonData);
+      } catch (e) {
+        debugLog.add('Error decoding JSON: $e');
+        throw Exception('Failed to parse exercise data: $e');
+      }
     } else {
-      throw Exception(
-          'Failed to load burned calories: ${response.statusCode}'); // Throw an exception for failed request
+      throw Exception('Failed to load burned calories: ${response.statusCode}');
     }
   }
 }
