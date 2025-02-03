@@ -118,13 +118,13 @@ class ApiCalls {
 
     // Request headers for the API call
     const Map<String, String> requestHeaders = {
-      'X-RapidAPI-Key': 'YOUR_API_KEY_HERE',
+      'X-RapidAPI-Key': 'c93f0e349bmsh4f90f71e75907a8p166d42jsne574e84b3e47',
       'X-RapidAPI-Host': 'calories-burned-by-api-ninjas.p.rapidapi.com'
     };
 
     // Query parameters for the API call
     final Map<String, String> queryParams = {
-      'activities': activity,
+      'activity': activity,
       'duration': duration.toString(),
     };
 
@@ -141,11 +141,11 @@ class ApiCalls {
     debugLog.add('Response status: ${response.statusCode}');
     debugLog.add('Response body: ${response.body}');
 
-    print(response.body);  // Print raw response body to console
+    print(response.body); // Print raw response body to console
 
     if (response.statusCode == 200) {
       try {
-        final jsonData = jsonDecode(response.body);
+        final jsonData = jsonDecode(response.body)[0];
         debugLog.add('Decoded response: $jsonData');
         return Exercise.fromJson(jsonData);
       } catch (e) {

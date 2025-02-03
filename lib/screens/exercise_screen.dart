@@ -81,31 +81,33 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                         child:
                             CircularProgressIndicator()); // Show loading indicator while fetching data
                   }
-                  return ListView.builder(
-                    itemCount: snapshot
-                        .data!.docs.length, // Number of exercises to display
-                    itemBuilder: (context, index) {
-                      final QueryDocumentSnapshot doc = snapshot
-                          .data!.docs[index]; // Get document for each exercise
-                      return ListTile(
-                        title: Text(
-                          doc['activity'] ??
-                              'Unknown Activity', // Display activity name
-                          style: const TextStyle(color: Colors.black),
-                        ),
-                        subtitle: Text(
-                          doc['duration']?.toString() ??
-                              '0', // Display duration of the activity
-                          style: const TextStyle(color: Colors.black),
-                        ),
-                        trailing: Text(
-                          doc['burnedCalories']?.toString() ??
-                              '0 ', // Display calories burned
-                          style: const TextStyle(color: Colors.black),
-                        ),
-                      );
-                    },
-                  );
+                  if (snapshot.hasData) {
+                    return ListView.builder(
+                      itemCount: snapshot
+                          .data!.docs.length, // Number of exercises to display
+                      itemBuilder: (context, index) {
+                        final QueryDocumentSnapshot doc =
+                            snapshot.data!.docs[index];
+                        // Get document for each exercise
+                        return ListTile(
+                          title: Text(
+                            doc['activity']?.toString() ??
+                                '', // Display activity name
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          subtitle: Text(
+                            '${doc['duration']?.toString() ?? '0'} min', // Display duration of the activity
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                          trailing: Text(
+                            '${doc['burnedCalories']?.toString() ?? '0'} kcal', // Display calories burned
+                            style: const TextStyle(color: Colors.white),
+                          ),
+                        );
+                      },
+                    );
+                  }
+                  return CircularProgressIndicator();
                 },
               ),
             ),

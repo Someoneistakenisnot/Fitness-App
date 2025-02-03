@@ -33,6 +33,7 @@ class Exercise {
   ///
   /// This method extracts the relevant data from the provided map
   /// and returns a new instance of the Exercise class.
+  /// Save to Firebase
   factory Exercise.fromMap(Map<String, dynamic> map) {
     // Return a new Exercise instance using values from the map
     return Exercise(
