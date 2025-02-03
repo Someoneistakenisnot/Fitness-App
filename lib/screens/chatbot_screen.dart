@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
+import 'dart:async';
 
 import '../models/message.dart';
 import '../utilities/firebase_calls.dart';
@@ -16,6 +17,9 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   final List<Message> _messages = [];
   final TextEditingController _textController = TextEditingController();
   final Random _random = Random();
+  bool _isTyping = false;
+  Timer? _typingTimer;
+  int _dotCount = 0;
 
   String _formatTimestamp(DateTime timestamp) {
     return DateFormat('MMM d, y • HH:mm').format(timestamp);
@@ -30,17 +34,31 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
         isUserMessage: true,
         timestamp: DateTime.now().toUtc().add(const Duration(hours: 8)),
       ));
+      _isTyping = true;
     });
+
+    _startTypingAnimation();
 
     int delayInSeconds = _random.nextInt(5) + 1;
 
     Future.delayed(Duration(seconds: delayInSeconds), () {
       setState(() {
+        _isTyping = false;
+        _typingTimer?.cancel();
+        _dotCount = 0;
         _messages.add(Message(
           text: _getBotResponse(text),
           isUserMessage: false,
           timestamp: DateTime.now().toUtc().add(const Duration(hours: 8)),
         ));
+      });
+    });
+  }
+
+  void _startTypingAnimation() {
+    _typingTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      setState(() {
+        _dotCount = (_dotCount + 1) % 4;
       });
     });
   }
@@ -133,9 +151,14 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
             child: ListView.builder(
               padding: const EdgeInsets.all(8.0),
               reverse: false,
-              itemCount: _messages.length,
-              itemBuilder: (context, index) =>
-                  _buildMessageBubble(_messages[index]),
+              itemCount: _messages.length + (_isTyping ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (_isTyping && index == _messages.length) {
+                  return _buildTypingIndicator();
+                } else {
+                  return _buildMessageBubble(_messages[index]);
+                }
+              },
             ),
           ),
           SafeArea(
@@ -183,6 +206,25 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
               style: const TextStyle(fontSize: 10, color: Colors.black),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTypingIndicator() {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+        padding: const EdgeInsets.all(10.0),
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Text(
+          'Bot is typing${'.' * _dotCount}',
+          style: const TextStyle(
+              fontSize: 14, color: Colors.black54, fontStyle: FontStyle.italic),
         ),
       ),
     );
