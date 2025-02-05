@@ -1,12 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart'; // Import Firestore for database access
-import 'package:fitness/models/exercise.dart'; // Import Exercise model
-import 'package:fitness/utilities/firebase_calls.dart'; // Import Firebase utility functions
-import 'package:flutter/material.dart'; // Import Flutter material design package
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fitness/models/exercise.dart';
+import 'package:fitness/utilities/firebase_calls.dart';
+import 'package:flutter/material.dart';
+import '../screens/add_exercise_screen.dart';
+import '../widgets/navigation_bar.dart';
 
-import '../screens/add_exercise_screen.dart'; // Import screen for adding exercises
-import '../widgets/navigation_bar.dart'; // Import custom navigation bar widget
-
-/// ExerciseScreen widget for displaying and managing exercises
 class ExerciseScreen extends StatefulWidget {
   const ExerciseScreen({Key? key}) : super(key: key);
 
@@ -14,19 +12,16 @@ class ExerciseScreen extends StatefulWidget {
   State<ExerciseScreen> createState() => _ExerciseScreenState();
 }
 
-/// State class for managing the ExerciseScreen's state
 class _ExerciseScreenState extends State<ExerciseScreen> {
-  List<Exercise> exercises = []; // List to store exercises
+  List<Exercise> exercises = [];
 
-  /// Adds a new exercise to the list
   void _addExercise(
       String newActivity, int newDuration, int newBurnedCalories) {
     setState(() {
       exercises.add(Exercise(
-        activity: newActivity, // Activity name
-        duration: newDuration, // Duration of the activity
-        burnedCalories:
-            newBurnedCalories, // Calories burned during the activity
+        activity: newActivity,
+        duration: newDuration,
+        burnedCalories: newBurnedCalories,
       ));
     });
   }
@@ -34,114 +29,172 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: MyBottomNavigationBar(
-          selectedIndexNavBar: 1), // Custom navigation bar
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start, // Align children to the start
-          children: [
-            // Header displaying the number of exercises
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: StreamBuilder<QuerySnapshot>(
-                stream: exercisesCollection
-                    .where('userid',
-                        isEqualTo: auth.currentUser
-                            ?.uid) // Filter exercises by current user ID
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return const Center(
-                        child: Text('Error fetching exercises'));
-                  }
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                        child:
-                            CircularProgressIndicator()); // Show loading indicator while fetching data
-                  }
-                  return Text(
-                    '${snapshot.data?.docs.length ?? 0} Exercises', // Display count of exercises
-                    style: const TextStyle(color: Colors.black, fontSize: 18),
-                  );
-                },
-              ),
-            ),
-            Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: exercisesCollection
-                    .snapshots(), // Stream to listen for exercise updates
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return const Center(
-                        child: Text('Error fetching exercises'));
-                  }
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                        child:
-                            CircularProgressIndicator()); // Show loading indicator while fetching data
-                  }
-                  if (snapshot.hasData) {
-                    return ListView.builder(
-                      itemCount: snapshot
-                          .data!.docs.length, // Number of exercises to display
-                      itemBuilder: (context, index) {
-                        final QueryDocumentSnapshot doc =
-                            snapshot.data!.docs[index];
-                        // Get document for each exercise
-                        return ListTile(
-                          title: Text(
-                            doc['activity']?.toString() ??
-                                '', // Display activity name
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          subtitle: Text(
-                            '${doc['duration']?.toString() ?? '0'} min', // Display duration of the activity
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          trailing: Text(
-                            '${doc['burnedCalories']?.toString() ?? '0'} kcal', // Display calories burned
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                        );
-                      },
-                    );
-                  }
-                  return CircularProgressIndicator();
-                },
-              ),
-            ),
-            // Centered Add Exercise button with padding
-            Padding(
-              padding: const EdgeInsets.only(bottom: 20.0),
-              child: Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    // Show modal bottom sheet for adding a new exercise
-                    showModalBottomSheet(
-                      isScrollControlled: true,
-                      context: context,
-                      builder: (BuildContext context) {
-                        return SingleChildScrollView(
-                          child: Container(
-                            padding: EdgeInsets.only(
-                                bottom: MediaQuery.of(context)
-                                    .viewInsets
-                                    .bottom), // Adjust padding for keyboard
-                            child: AddExerciseScreen(
-                              addExerciseCallback:
-                                  _addExercise, // Callback to add exercise
-                            ),
-                          ),
-                        );
-                      },
+      backgroundColor: Colors.grey[100],
+      appBar: AppBar(
+        title: const Text(
+          'Exercise Tracker',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.teal,
+        elevation: 0,
+      ),
+      bottomNavigationBar: MyBottomNavigationBar(selectedIndexNavBar: 1),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.teal.shade50, Colors.grey.shade100],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: exercisesCollection
+                      .where('userid', isEqualTo: auth.currentUser?.uid)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError)
+                      return const Center(
+                          child: Text('Error fetching exercises'));
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    return Text(
+                      '${snapshot.data?.docs.length ?? 0} Exercises',
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal,
+                      ),
                     );
                   },
-                  child: const Text('Add Exercise'), // Button text
                 ),
               ),
-            ),
-          ],
+              Expanded(
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: exercisesCollection
+                      .where('userid', isEqualTo: auth.currentUser?.uid)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError)
+                      return const Center(
+                          child: Text('Error fetching exercises'));
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasData) {
+                      return ListView.builder(
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          final doc = snapshot.data!.docs[index];
+                          return Card(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.all(16),
+                              title: Text(
+                                doc['activity']?.toString() ?? '',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.teal,
+                                ),
+                              ),
+                              subtitle: Text(
+                                'Duration: ${doc['duration']?.toString() ?? '0'} min',
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              trailing: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    '${doc['burnedCalories']?.toString() ?? '0'}',
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                  Text(
+                                    'kcal',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    }
+                    return const Center(child: CircularProgressIndicator());
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Center(
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 40, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                    onPressed: () {
+                      showModalBottomSheet(
+                        isScrollControlled: true,
+                        context: context,
+                        builder: (BuildContext context) {
+                          return SingleChildScrollView(
+                            child: Container(
+                              padding: EdgeInsets.only(
+                                bottom:
+                                    MediaQuery.of(context).viewInsets.bottom,
+                                left: 20,
+                                right: 20,
+                                top: 20,
+                              ),
+                              child: AddExerciseScreen(
+                                  addExerciseCallback: _addExercise),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                    child: const Text(
+                      'Add Exercise',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

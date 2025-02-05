@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
 import 'dart:async';
-
 import '../models/message.dart';
 import '../utilities/firebase_calls.dart';
 
@@ -143,22 +142,44 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Fitness Assistant'),
+        title: const Text(
+          'Fitness Assistant',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        backgroundColor: Colors.teal,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(8.0),
-              reverse: false,
-              itemCount: _messages.length + (_isTyping ? 1 : 0),
-              itemBuilder: (context, index) {
-                if (_isTyping && index == _messages.length) {
-                  return _buildTypingIndicator();
-                } else {
-                  return _buildMessageBubble(_messages[index]);
-                }
-              },
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.grey.shade100, Colors.grey.shade100],
+                ),
+              ),
+              child: ListView.builder(
+                padding: const EdgeInsets.all(8.0),
+                reverse: false,
+                itemCount: _messages.length + (_isTyping ? 1 : 0),
+                itemBuilder: (context, index) {
+                  if (_isTyping && index == _messages.length) {
+                    return _buildTypingIndicator();
+                  } else {
+                    return _buildMessageBubble(_messages[index]);
+                  }
+                },
+              ),
             ),
           ),
           SafeArea(
@@ -174,36 +195,56 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
       alignment:
           message.isUserMessage ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-        padding: const EdgeInsets.all(10.0),
+        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          color: message.isUserMessage ? Colors.blue[200] : Colors.grey[300],
-          borderRadius: BorderRadius.circular(10.0),
+          color: message.isUserMessage
+              ? Colors.teal.shade400
+              : Colors.grey,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: message.isUserMessage
               ? CrossAxisAlignment.end
               : CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               message.isUserMessage
                   ? auth.currentUser?.displayName ?? 'You'
-                  : 'Bot',
-              style: const TextStyle(
+                  : 'Fitness Bot',
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color:
+                    message.isUserMessage ? Colors.white : Colors.teal.shade600,
               ),
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 8),
             Text(
               message.text,
-              style: const TextStyle(fontSize: 16, color: Colors.black),
+              style: TextStyle(
+                fontSize: 16,
+                color: message.isUserMessage ? Colors.white : Colors.black,
+              ),
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 8),
             Text(
               _formatTimestamp(message.timestamp),
-              style: const TextStyle(fontSize: 10, color: Colors.black),
+              style: TextStyle(
+                fontSize: 10,
+                color: message.isUserMessage
+                    ? Colors.white
+                    : Colors.black,
+              ),
             ),
           ],
         ),
@@ -215,16 +256,47 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-        padding: const EdgeInsets.all(10.0),
+        margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+        padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          color: Colors.grey[300],
-          borderRadius: BorderRadius.circular(10.0),
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 3,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
-        child: Text(
-          'Bot is typing${'.' * _dotCount}',
-          style: const TextStyle(
-              fontSize: 14, color: Colors.black54, fontStyle: FontStyle.italic),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Fitness Bot is typing',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 24,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 500),
+                child: Text(
+                  '.' * _dotCount,
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -232,23 +304,48 @@ class _ChatBotScreenState extends State<ChatBotScreen> {
 
   Widget _buildTextComposer() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 16.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _textController,
-              onSubmitted: _handleSubmitted,
-              decoration: const InputDecoration(
-                hintText: 'What are you thinking of today?',
+      padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 16.0),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _textController,
+                onSubmitted: _handleSubmitted,
+                style: const TextStyle(color: Colors.black), // Add this line
+                decoration: InputDecoration(
+                  hintText: 'Ask about fitness, health, or nutrition...',
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+                  hintStyle: TextStyle(color: Colors.grey.shade600),
+                ),
               ),
             ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.send),
-            onPressed: () => _handleSubmitted(_textController.text),
-          ),
-        ],
+            Container(
+              margin: const EdgeInsets.only(right: 1),
+              decoration: BoxDecoration(
+                color: Colors.teal,
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.send, color: Colors.white),
+                onPressed: () => _handleSubmitted(_textController.text),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

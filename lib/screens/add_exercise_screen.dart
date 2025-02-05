@@ -1,6 +1,4 @@
-//fix infinity screen error here
 import 'package:flutter/material.dart';
-
 import '../models/exercise.dart';
 import '../utilities/api_calls.dart';
 import '../utilities/firebase_calls.dart';
@@ -72,89 +70,84 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: Container(
-          width: double.infinity,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // TextField for Activity with Autocomplete
-              _buildAutocompleteTextField(
-                label: 'Activity',
-                controller: activityController,
-                options: activities,
-                onSelected: (String selection) {
-                  setState(() {
-                    selectedActivity = selection;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Activity Input
+            _buildAutocompleteTextField(
+              label: 'Activity',
+              controller: activityController,
+              options: activities,
+              onSelected: (String selection) {
+                setState(() => selectedActivity = selection);
+              },
+            ),
+            const SizedBox(height: 16),
 
-              // TextField for Duration with Autocomplete
-              _buildAutocompleteTextField(
-                label: 'Duration (minutes)',
-                controller: durationController,
-                options: durations,
-                onSelected: (String selection) {
-                  setState(() {
-                    selectedDuration = selection;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
+            // Duration Input
+            _buildAutocompleteTextField(
+              label: 'Duration (minutes)',
+              controller: durationController,
+              options: durations,
+              onSelected: (String selection) {
+                setState(() => selectedDuration = selection);
+              },
+            ),
+            const SizedBox(height: 24),
 
-              Center(
-                child: ElevatedButton(
-                  child: Text('ADD'),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.black,
-                    backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
+            // Add Button
+            Center(
+              child: ElevatedButton(
+                child: const Text('ADD'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0),
                   ),
-                  onPressed: () async {
-                    // Validate if activity and duration are selected
-                    if (selectedActivity == null || selectedDuration == null) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                            content:
-                                Text('Please select an activity and duration')),
-                      );
-                      return;
-                    }
-
-                    // Fetch burned calories from the API
-                    Exercise burnedCaloriesInfo = await ApiCalls()
-                        .fetchBurnedCalories(
-                            selectedActivity!, int.parse(selectedDuration!));
-
-                    // Update the exercise object with the selected activity and duration
-                    Exercise exercises = Exercise(
-                      activity: selectedActivity!,
-                      burnedCalories: burnedCaloriesInfo.burnedCalories,
-                      duration: int.parse(selectedDuration!),
-                    );
-
-                    // Save the exercise to Firestore
-                    await FirebaseCalls().addExercise(exercises);
-
-                    // Show a success message
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Exercise added successfully!')),
-                    );
-
-                    // Call the callback with the correct parameters
-                    widget.addExerciseCallback(
-                        selectedActivity!,
-                        int.parse(selectedDuration!),
-                        burnedCaloriesInfo.burnedCalories);
-                    Navigator.pop(context);
-                  },
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                 ),
+                onPressed: () async {
+                  if (selectedActivity == null || selectedDuration == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text(
+                            'Please select an activity and duration'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                    return;
+                  }
+
+                  Exercise burnedCaloriesInfo = await ApiCalls()
+                      .fetchBurnedCalories(
+                          selectedActivity!, int.parse(selectedDuration!));
+
+                  Exercise exercises = Exercise(
+                    activity: selectedActivity!,
+                    burnedCalories: burnedCaloriesInfo.burnedCalories,
+                    duration: int.parse(selectedDuration!),
+                  );
+
+                  await FirebaseCalls().addExercise(exercises);
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: const Text('Exercise added successfully!'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+
+                  widget.addExerciseCallback(
+                      selectedActivity!,
+                      int.parse(selectedDuration!),
+                      burnedCaloriesInfo.burnedCalories);
+                  Navigator.pop(context);
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -208,10 +201,22 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
       child: TextField(
         focusNode: focusNode,
         keyboardType: inputType,
+        style: const TextStyle(color: Colors.black), // Text color
         decoration: InputDecoration(
+          filled: true, // Enable fill
+          fillColor: Colors.white, // Background color
           labelText: label,
+          labelStyle: TextStyle(color: Colors.teal[800]), // Label color
           suffixText: suffixText,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8.0)),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: const BorderSide(color: Colors.teal),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: const BorderSide(color: Colors.teal, width: 2.0),
+          ),
+          contentPadding: const EdgeInsets.all(16), // Add padding
         ),
         controller: controller,
       ),

@@ -53,7 +53,10 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: const Text('Fitness Dashboard'),
+        title: const Text(
+          'Fitness Dashboard',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
         elevation: 0,
         backgroundColor: Colors.teal,
         actions: [
@@ -83,6 +86,9 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context, '/chatbot'),
         backgroundColor: Colors.teal,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50), // Ensures circular shape
+        ),
         child: const Icon(Icons.chat, color: Colors.white),
       ),
       bottomNavigationBar: MyBottomNavigationBar(selectedIndexNavBar: 0),
@@ -93,9 +99,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.teal,
-        borderRadius: const BorderRadius.only(
+        borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(30),
           bottomRight: Radius.circular(30),
         ),
@@ -265,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 32, color: color),
+            Icon(icon, size: 29, color: color),
             const SizedBox(height: 10),
             Text(
               title,
