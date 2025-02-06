@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitness/models/exercise.dart';
 import 'package:fitness/utilities/firebase_calls.dart';
 import 'package:flutter/material.dart';
+
 import '../screens/add_exercise_screen.dart';
 import '../widgets/navigation_bar.dart';
 
@@ -13,18 +14,18 @@ class ExerciseScreen extends StatefulWidget {
 }
 
 class _ExerciseScreenState extends State<ExerciseScreen> {
-  List<Exercise> exercises = [];
-
-  void _addExercise(
-      String newActivity, int newDuration, int newBurnedCalories) {
-    setState(() {
-      exercises.add(Exercise(
-        activity: newActivity,
-        duration: newDuration,
-        burnedCalories: newBurnedCalories,
-      ));
-    });
-  }
+  // List<Exercise> exercises = [];
+  //
+  // void _addExercise(
+  //     String newActivity, int newDuration, int newBurnedCalories) {
+  //   setState(() {
+  //     exercises.add(Exercise(
+  //       activity: newActivity,
+  //       duration: newDuration,
+  //       burnedCalories: newBurnedCalories,
+  //     ));
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -120,23 +121,72 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                                   fontSize: 14,
                                 ),
                               ),
-                              trailing: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
+                              // trailing: Column(
+                              //   mainAxisAlignment: MainAxisAlignment.center,
+                              //   children: [
+                              //     Text(
+                              //       '${doc['burnedCalories']?.toString() ?? '0'}',
+                              //       style: const TextStyle(
+                              //         fontSize: 20,
+                              //         fontWeight: FontWeight.bold,
+                              //         color: Colors.red,
+                              //       ),
+                              //     ),
+                              //     Text(
+                              //       'kcal',
+                              //       style: TextStyle(
+                              //         fontSize: 12,
+                              //         color: Colors.grey.shade600,
+                              //       ),
+                              //     ),
+                              //   ],
+                              // ),
+                              // In the ListTile builder of ExerciseScreen, modify the trailing widget:
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text(
-                                    '${doc['burnedCalories']?.toString() ?? '0'}',
-                                    style: const TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.red,
-                                    ),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        '${doc['burnedCalories']?.toString() ?? '0'}',
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                      Text(
+                                        'kcal',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.grey.shade600,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  Text(
-                                    'kcal',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade600,
-                                    ),
+                                  IconButton(
+                                    icon: Icon(Icons.delete,
+                                        color: Colors.grey.shade600),
+                                    onPressed: () async {
+                                      try {
+                                        await FirebaseCalls()
+                                            .deleteExercise(doc.id);
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  'Exercise deleted successfully')),
+                                        );
+                                      } catch (e) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                              content: Text(
+                                                  'Delete failed: ${e.toString()}')),
+                                        );
+                                      }
+                                    },
                                   ),
                                 ],
                               ),
@@ -161,6 +211,28 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
+                    // onPressed: () {
+                    //   showModalBottomSheet(
+                    //     isScrollControlled: true,
+                    //     context: context,
+                    //     builder: (BuildContext context) {
+                    //       return SingleChildScrollView(
+                    //         child: Container(
+                    //           padding: EdgeInsets.only(
+                    //             bottom:
+                    //                 MediaQuery.of(context).viewInsets.bottom,
+                    //             left: 20,
+                    //             right: 20,
+                    //             top: 20,
+                    //           ),
+                    //           child: AddExerciseScreen(
+                    //               addExerciseCallback: _addExercise),
+                    //         ),
+                    //       );
+                    //     },
+                    //   );
+                    // },
+                    // Modify the bottom sheet implementation:
                     onPressed: () {
                       showModalBottomSheet(
                         isScrollControlled: true,
@@ -176,7 +248,28 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                                 top: 20,
                               ),
                               child: AddExerciseScreen(
-                                  addExerciseCallback: _addExercise),
+                                addExerciseCallback:
+                                    (activity, duration, calories) async {
+                                  try {
+                                    await FirebaseCalls().addExercise(Exercise(
+                                      activity: activity,
+                                      duration: duration,
+                                      burnedCalories: calories,
+                                    ));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              'Exercise added successfully')),
+                                    );
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                          content: Text(
+                                              'Error adding exercise: $e')),
+                                    );
+                                  }
+                                },
+                              ),
                             ),
                           );
                         },

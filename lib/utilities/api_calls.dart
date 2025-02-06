@@ -156,4 +156,51 @@ class ApiCalls {
       throw Exception('Failed to load burned calories: ${response.statusCode}');
     }
   }
+
+  Future<String> chatGptRequest(String message) async {
+    const String url = "https://chatgpt-42.p.rapidapi.com/gpt4";
+
+    // Request headers for ChatGPT API
+    const Map<String, String> requestHeaders = {
+      "x-rapidapi-key": "c93f0e349bmsh4f90f71e75907a8p166d42jsne574e84b3e47",
+      "x-rapidapi-host": "chatgpt-42.p.rapidapi.com",
+      "Content-Type": "application/json",
+    };
+
+    // Request payload
+    final Map<String, dynamic> payload = {
+      "messages": [
+        {"role": "user", "content": message}
+      ],
+      "web_access": false,
+    };
+
+    // Log the request details
+    debugLog.add('Sending POST request to $url');
+    debugLog.add('Headers: $requestHeaders');
+    debugLog.add('Payload: $payload');
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: requestHeaders,
+        body: jsonEncode(payload),
+      );
+
+      debugLog.add('Response status: ${response.statusCode}');
+      debugLog.add('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        return jsonResponse[
+            'result']; // Adjust this key based on actual response structure
+      } else {
+        throw Exception(
+            'Failed to get ChatGPT response: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      debugLog.add('Error in ChatGPT request: $e');
+      throw Exception('Failed to communicate with ChatGPT: $e');
+    }
+  }
 }
