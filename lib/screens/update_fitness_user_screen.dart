@@ -1,10 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import '../models/fitness_user.dart';
-import '../utilities/firebase_calls.dart';
-import '../widgets/navigation_bar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore package for database operations
+import 'package:firebase_auth/firebase_auth.dart'; // Firebase authentication package
+import 'package:flutter/material.dart'; // Flutter material design package
 
+import '../models/fitness_user.dart'; // Importing FitnessUser  model
+import '../utilities/firebase_calls.dart'; // Importing Firebase calls utility
+import '../widgets/navigation_bar.dart'; // Importing custom navigation bar widget
+
+/// Screen for updating the fitness user profile
 class UpdateFitnessUserScreen extends StatefulWidget {
   const UpdateFitnessUserScreen({Key? key}) : super(key: key);
 
@@ -14,14 +16,21 @@ class UpdateFitnessUserScreen extends StatefulWidget {
 }
 
 class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
+// Controllers for text fields
   final TextEditingController weightController = TextEditingController();
   final TextEditingController heightController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
+
+// Focus nodes for managing focus on text fields
   final FocusNode weightFocusNode = FocusNode();
   final FocusNode heightFocusNode = FocusNode();
   final FocusNode ageFocusNode = FocusNode();
+
+// Variables for selected gender and exercise level
   String? selectedGender;
   String? selectedExerciseLevel;
+
+// Options for gender and exercise level dropdowns
   final List<String> genderOptions = ['male', 'female'];
   final List<String> exerciseOptions = [
     'little',
@@ -30,16 +39,20 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
     'heavy',
     'very heavy'
   ];
-  bool _isInitialized = false;
-  late DocumentSnapshot _initialData;
+
+  bool _isInitialized = false; // Flag to check if data is initialized
+  late DocumentSnapshot
+      _initialData; // Variable to hold initial data from Firestore
 
   @override
   void initState() {
     super.initState();
-    _loadInitialData();
+    _loadInitialData(); // Load initial data when the screen is initialized
   }
 
+  @override
   void dispose() {
+// Dispose of controllers and focus nodes to free up resources
     weightController.dispose();
     heightController.dispose();
     ageController.dispose();
@@ -49,6 +62,7 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
     super.dispose();
   }
 
+  /// Loads initial data from Firestore for the current user
   Future<void> _loadInitialData() async {
     final snapshot = await FirebaseFirestore.instance
         .collection('fitnessUsers')
@@ -56,14 +70,16 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
         .get();
 
     if (snapshot.docs.isNotEmpty) {
-      _initialData = snapshot.docs.first;
-      _initializeControllers();
+      _initialData = snapshot.docs.first; // Get the first document
+      _initializeControllers(); // Initialize text controllers with data
     }
   }
 
+  /// Initializes the text controllers with data from Firestore
   void _initializeControllers() {
-    if (_isInitialized) return;
+    if (_isInitialized) return; // Prevent re-initialization
 
+// Set the text fields with initial data
     weightController.text = _initialData.get('weight').toString();
     heightController.text = _initialData.get('height').toString();
     ageController.text = _initialData.get('age').toString();
@@ -71,36 +87,40 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
     final exercise = _initialData.get('exercise');
     selectedExerciseLevel = exercise == 'veryheavy' ? 'very heavy' : exercise;
 
-    _isInitialized = true;
+    _isInitialized = true; // Mark as initialized
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.grey[100], // Background color for the screen
       appBar: AppBar(
         title: const Text(
-          'Update Profile',
+          'Update Profile', // Title of the app bar
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.teal,
-        elevation: 0,
+        backgroundColor: Colors.teal, // App bar background color
+        elevation: 0, // No shadow
       ),
-      bottomNavigationBar: MyBottomNavigationBar(selectedIndexNavBar: 2),
+      bottomNavigationBar: MyBottomNavigationBar(
+          selectedIndexNavBar: 2), // Custom navigation bar
       body: SafeArea(
         child: FutureBuilder<void>(
-          future: _loadInitialData(),
+          future: _loadInitialData(), // Load initial data asynchronously
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                  child:
+                      CircularProgressIndicator()); // Show loading indicator while waiting
             }
 
             return SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16.0), // Padding for the content
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
+// Weight input field
                     _buildTextField(
                       label: 'Weight (kg)',
                       controller: weightController,
@@ -110,7 +130,8 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                       validator: (value) =>
                           _validatePositiveNumber(value, 'Weight'),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 16), // Spacing between fields
+// Height input field
                     _buildTextField(
                       label: 'Height (cm)',
                       controller: heightController,
@@ -120,7 +141,8 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                       validator: (value) =>
                           _validatePositiveNumber(value, 'Height'),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 16), // Spacing between fields
+// Gender dropdown field
                     _buildDropdownField(
                       label: 'Gender',
                       value: selectedGender,
@@ -128,7 +150,8 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                       onChanged: (value) =>
                           setState(() => selectedGender = value),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 16), // Spacing between fields
+// Age input field
                     _buildTextField(
                         label: 'Age',
                         controller: ageController,
@@ -136,7 +159,8 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                         inputType: TextInputType.number,
                         validator: (value) =>
                             _validatePositiveNumber(value, 'Age')),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 16), // Spacing between fields
+// Activity level dropdown field
                     _buildDropdownField(
                       label: 'Activity Level',
                       value: selectedExerciseLevel,
@@ -144,18 +168,22 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                       onChanged: (value) =>
                           setState(() => selectedExerciseLevel = value),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 24), // Spacing before button
+// Save changes button
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
+                        backgroundColor: Colors.teal, // Button background color
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius:
+                              BorderRadius.circular(12), // Rounded corners
                         ),
                       ),
                       onPressed: () async {
-                        if (!_validateAllFields()) return;
+                        if (!_validateAllFields())
+                          return; // Validate fields before saving
 
+// Create a FitnessUser  object with updated data
                         final fitnessUser = FitnessUser(
                           weight: int.parse(weightController.text),
                           height: int.parse(heightController.text),
@@ -166,15 +194,16 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
                               : selectedExerciseLevel!,
                         );
 
-                        await FirebaseCalls().updateFitnessUser(fitnessUser);
-                        setState(() {});
+                        await FirebaseCalls().updateFitnessUser(
+                            fitnessUser); // Update user in Firestore
+                        setState(() {}); // Refresh the UI
                       },
                       child: const Text(
-                        'SAVE CHANGES',
+                        'SAVE', // Button text
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: Colors.white, // Button text color
                         ),
                       ),
                     ),
@@ -188,6 +217,7 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
     );
   }
 
+  /// Builds a text field with specified parameters
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
@@ -200,27 +230,26 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
       controller: controller,
       focusNode: focusNode,
       keyboardType: inputType,
-      style:
-          const TextStyle(color: Colors.black), // Add this line for black text
+      style: const TextStyle(color: Colors.black), // Text color
       decoration: InputDecoration(
-        labelText: label,
-        suffixText: suffixText,
+        labelText: label, // Label for the text field
+        suffixText: suffixText, // Suffix text (e.g., kg, cm)
         suffixStyle:
             const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12), // Rounded border
           borderSide: const BorderSide(color: Colors.black),
         ),
         filled: true,
-        fillColor:
-            Colors.grey[400], // Changed from grey to white for better contrast
+        fillColor: Colors.grey[400], // Background color of the text field
         labelStyle: const TextStyle(
             color: Colors.black,
-            fontWeight: FontWeight.bold), // Optional: Style label text
+            fontWeight: FontWeight.bold), // Label text style
       ),
     );
   }
 
+  /// Builds a dropdown field with specified parameters
   Widget _buildDropdownField({
     required String label,
     required String? value,
@@ -229,52 +258,55 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
   }) {
     return InputDecorator(
       decoration: InputDecoration(
-        labelText: label,
+        labelText: label, // Label for the dropdown
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12), // Rounded border
           borderSide: const BorderSide(color: Colors.black),
         ),
         filled: true,
-        fillColor: Colors.grey[400],
+        fillColor: Colors.grey[400], // Background color of the dropdown
         labelStyle:
             const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           icon: const Icon(Icons.arrow_drop_down,
-              color: Colors.black), // Arrow icon
+              color: Colors.black), // Arrow icon for dropdown
           iconEnabledColor: Colors.black, // Color when dropdown is enabled
-          iconDisabledColor: Colors.black,
-          value: value,
-          isExpanded: true,
-          style: const TextStyle(color: Colors.black),
-          dropdownColor:
-              Colors.grey[400], // Add this for dropdown menu background
+          iconDisabledColor: Colors.black, // Color when dropdown is disabled
+          value: value, // Current selected value
+          isExpanded: true, // Expand to fill available space
+          style: const TextStyle(
+              color: Colors.black), // Text color for dropdown items
+          dropdownColor: Colors.grey[400], // Background color for dropdown menu
           items: options.map((String value) {
             return DropdownMenuItem<String>(
-              value: value,
+              value: value, // Value for the dropdown item
               child: Text(
-                value.toUpperCase(),
+                value.toUpperCase(), // Display value in uppercase
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Colors.black, // Keep text color black for contrast
+                  color: Colors.black, // Text color for dropdown item
                 ),
               ),
             );
           }).toList(),
-          onChanged: onChanged,
+          onChanged: onChanged, // Callback when a new item is selected
         ),
       ),
     );
   }
 
+  /// Validates all input fields and shows a snackbar if any are invalid
   bool _validateAllFields() {
-    String? weightError =
-        _validatePositiveNumber(weightController.text, 'Weight');
-    String? heightError =
-        _validatePositiveNumber(heightController.text, 'Height');
-    String? ageError = _validatePositiveNumber(ageController.text, 'Age');
+    String? weightError = _validatePositiveNumber(
+        weightController.text, 'Weight'); // Validate weight
+    String? heightError = _validatePositiveNumber(
+        heightController.text, 'Height'); // Validate height
+    String? ageError =
+        _validatePositiveNumber(ageController.text, 'Age'); // Validate age
 
+// Check if any fields are invalid
     if (weightError != null ||
         heightError != null ||
         ageError != null ||
@@ -290,9 +322,10 @@ class _UpdateFitnessUserScreenState extends State<UpdateFitnessUserScreen> {
     return true; // All fields are valid
   }
 
+  /// Validates if a given value is a positive number
   String? _validatePositiveNumber(String? value, String fieldName) {
     if (value == null || value.isEmpty) {
-      return '$fieldName cannot be empty'; // // Return error if the field is empty
+      return '$fieldName cannot be empty'; // Return error if the field is empty
     }
     final numValue =
         int.tryParse(value); // Try to parse the value as an integer

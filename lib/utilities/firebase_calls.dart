@@ -73,19 +73,6 @@ class FirebaseCalls {
 
   /// Adds or updates an [Exercise] document in Firestore.
   /// Throws an error if no user is logged in.
-  // Future<void> addExercise(Exercise exercises) async {
-  //   final user = auth.currentUser;
-  //   if (user == null) throw Exception("User not logged in");
-  //
-  //   // Merge data to update existing fields without overwriting the entire document
-  //   await exercisesCollection.doc(user.uid).set({
-  //     'activity': exercises.activity, // Activity name
-  //     'duration': exercises.duration, // Duration of the exercise
-  //     'burnedCalories':
-  //         exercises.burnedCalories, // Calories burned during the exercise
-  //     'userid': user.uid, // Include user ID for reference
-  //   }, SetOptions(merge: true)); // Merge instead of overwrite
-  // }
 
   // In firebase_calls.dart, update the addExercise method:
   Future<void> addExercise(Exercise exercise) async {

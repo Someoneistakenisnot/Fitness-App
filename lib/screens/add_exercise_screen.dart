@@ -1,16 +1,20 @@
-import 'package:flutter/material.dart';
-import '../models/exercise.dart';
-import '../utilities/api_calls.dart';
-import '../utilities/firebase_calls.dart';
+import 'package:flutter/material.dart'; // Flutter material design package
 
+import '../models/exercise.dart'; // Importing Exercise model
+import '../utilities/api_calls.dart'; // Importing API calls utility
+import '../utilities/firebase_calls.dart'; // Importing Firebase calls utility
+
+/// Screen for adding exercise data
 class AddExerciseScreen extends StatefulWidget {
   const AddExerciseScreen({super.key, required this.addExerciseCallback});
-  final Function addExerciseCallback;
+  final Function
+      addExerciseCallback; // Callback function to update exercise list
 
   @override
   State<AddExerciseScreen> createState() => _AddExerciseScreenState();
 }
 
+// List of available activities for the user to select
 List<String> activities = [
   'Aerobics',
   'Baseball',
@@ -44,6 +48,7 @@ List<String> activities = [
   'Walking',
 ];
 
+// List of available durations for the user to select
 List<String> durations = [
   '15',
   '30',
@@ -60,90 +65,103 @@ List<String> durations = [
 ];
 
 class _AddExerciseScreenState extends State<AddExerciseScreen> {
-  String? selectedActivity;
-  String? selectedDuration;
-  final TextEditingController activityController = TextEditingController();
-  final TextEditingController durationController = TextEditingController();
+  String? selectedActivity; // Variable to store selected activity
+  String? selectedDuration; // Variable to store selected duration
+  final TextEditingController activityController =
+      TextEditingController(); // Controller for activity input
+  final TextEditingController durationController =
+      TextEditingController(); // Controller for duration input
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0), // Padding for the screen
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Activity Input
+            // Activity Input Field
             _buildAutocompleteTextField(
               label: 'Activity',
               controller: activityController,
               options: activities,
               onSelected: (String selection) {
-                setState(() => selectedActivity = selection);
+                setState(() =>
+                    selectedActivity = selection); // Update selected activity
               },
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 16), // Space between fields
 
-            // Duration Input
+            // Duration Input Field
             _buildAutocompleteTextField(
               label: 'Duration (minutes)',
               controller: durationController,
               options: durations,
               onSelected: (String selection) {
-                setState(() => selectedDuration = selection);
+                setState(() =>
+                    selectedDuration = selection); // Update selected duration
               },
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 24), // Space before the button
 
             // Add Button
             Center(
               child: ElevatedButton(
-                child: const Text('ADD'),
+                child: const Text('ADD'), // Button text
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
-                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.teal, // Button background color
+                  foregroundColor: Colors.white, // Button text color
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.0),
+                    borderRadius:
+                        BorderRadius.circular(30.0), // Rounded button corners
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 40, vertical: 16), // Button padding
                 ),
                 onPressed: () async {
+                  // Check if both activity and duration are selected
                   if (selectedActivity == null || selectedDuration == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: const Text(
                             'Please select an activity and duration'),
-                        backgroundColor: Colors.red,
+                        backgroundColor:
+                            Colors.red, // SnackBar background color
                       ),
                     );
-                    return;
+                    return; // Exit if validation fails
                   }
 
+                  // Fetch burned calories information based on selected activity and duration
                   Exercise burnedCaloriesInfo = await ApiCalls()
                       .fetchBurnedCalories(
                           selectedActivity!, int.parse(selectedDuration!));
 
+                  // Create an Exercise object with the selected data
                   Exercise exercises = Exercise(
                     activity: selectedActivity!,
                     burnedCalories: burnedCaloriesInfo.burnedCalories,
                     duration: int.parse(selectedDuration!),
                   );
 
+                  // Add the exercise data to Firebase
                   await FirebaseCalls().addExercise(exercises);
 
+                  // Show success message
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: const Text('Exercise added successfully!'),
-                      backgroundColor: Colors.green,
+                      backgroundColor:
+                          Colors.green, // SnackBar background color
                     ),
                   );
 
+                  // Call the callback function to update the exercise list
                   widget.addExerciseCallback(
                       selectedActivity!,
                       int.parse(selectedDuration!),
                       burnedCaloriesInfo.burnedCalories);
-                  Navigator.pop(context);
+                  Navigator.pop(context); // Close the screen after adding
                 },
               ),
             ),
@@ -153,6 +171,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
     );
   }
 
+  /// Builds an autocomplete text field for selecting activities or durations
   Widget _buildAutocompleteTextField({
     required String label,
     required TextEditingController controller,
@@ -160,19 +179,21 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
     required ValueChanged<String> onSelected,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(
+          vertical: 8.0), // Padding for the text field
       child: Autocomplete<String>(
         optionsBuilder: (TextEditingValue textEditingValue) {
           if (textEditingValue.text.isEmpty) {
-            return const Iterable<String>.empty();
+            return const Iterable<String>.empty(); // Return empty if no input
           }
+          // Filter options based on user input
           return options.where((String option) {
             return option
                 .toLowerCase()
                 .contains(textEditingValue.text.toLowerCase());
           });
         },
-        onSelected: onSelected,
+        onSelected: onSelected, // Callback when an option is selected
         fieldViewBuilder: (BuildContext context,
             TextEditingController textEditingController,
             FocusNode focusNode,
@@ -181,13 +202,14 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
             label: label,
             controller: textEditingController,
             focusNode: focusNode,
-            inputType: TextInputType.text,
+            inputType: TextInputType.text, // Text input type
           );
         },
       ),
     );
   }
 
+  /// Builds a standard text field with specified properties
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
@@ -197,28 +219,32 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
     String? Function(String?)? validator,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(
+          vertical: 8.0), // Padding for the text field
       child: TextField(
-        focusNode: focusNode,
-        keyboardType: inputType,
+        focusNode: focusNode, // Focus node for the text field
+        keyboardType: inputType, // Keyboard type for the text field
         style: const TextStyle(color: Colors.black), // Text color
         decoration: InputDecoration(
-          filled: true, // Enable fill
-          fillColor: Colors.white, // Background color
-          labelText: label,
+          filled: true, // Enable fill for the text field
+          fillColor: Colors.white, // Background color of the text field
+          labelText: label, // Label for the text field
           labelStyle: TextStyle(color: Colors.teal[800]), // Label color
-          suffixText: suffixText,
+          suffixText: suffixText, // Optional suffix text
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.0),
-            borderSide: const BorderSide(color: Colors.teal),
+            borderRadius: BorderRadius.circular(8.0), // Rounded corners
+            borderSide: const BorderSide(color: Colors.teal), // Border color
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.0),
-            borderSide: const BorderSide(color: Colors.teal, width: 2.0),
+            borderRadius:
+                BorderRadius.circular(8.0), // Rounded corners when focused
+            borderSide: const BorderSide(
+                color: Colors.teal, width: 2.0), // Border color when focused
           ),
-          contentPadding: const EdgeInsets.all(16), // Add padding
+          contentPadding:
+              const EdgeInsets.all(16), // Padding inside the text field
         ),
-        controller: controller,
+        controller: controller, // Controller for the text field
       ),
     );
   }

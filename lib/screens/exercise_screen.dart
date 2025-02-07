@@ -14,19 +14,6 @@ class ExerciseScreen extends StatefulWidget {
 }
 
 class _ExerciseScreenState extends State<ExerciseScreen> {
-  // List<Exercise> exercises = [];
-  //
-  // void _addExercise(
-  //     String newActivity, int newDuration, int newBurnedCalories) {
-  //   setState(() {
-  //     exercises.add(Exercise(
-  //       activity: newActivity,
-  //       duration: newDuration,
-  //       burnedCalories: newBurnedCalories,
-  //     ));
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,27 +108,6 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                                   fontSize: 14,
                                 ),
                               ),
-                              // trailing: Column(
-                              //   mainAxisAlignment: MainAxisAlignment.center,
-                              //   children: [
-                              //     Text(
-                              //       '${doc['burnedCalories']?.toString() ?? '0'}',
-                              //       style: const TextStyle(
-                              //         fontSize: 20,
-                              //         fontWeight: FontWeight.bold,
-                              //         color: Colors.red,
-                              //       ),
-                              //     ),
-                              //     Text(
-                              //       'kcal',
-                              //       style: TextStyle(
-                              //         fontSize: 12,
-                              //         color: Colors.grey.shade600,
-                              //       ),
-                              //     ),
-                              //   ],
-                              // ),
-                              // In the ListTile builder of ExerciseScreen, modify the trailing widget:
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -211,28 +177,6 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    // onPressed: () {
-                    //   showModalBottomSheet(
-                    //     isScrollControlled: true,
-                    //     context: context,
-                    //     builder: (BuildContext context) {
-                    //       return SingleChildScrollView(
-                    //         child: Container(
-                    //           padding: EdgeInsets.only(
-                    //             bottom:
-                    //                 MediaQuery.of(context).viewInsets.bottom,
-                    //             left: 20,
-                    //             right: 20,
-                    //             top: 20,
-                    //           ),
-                    //           child: AddExerciseScreen(
-                    //               addExerciseCallback: _addExercise),
-                    //         ),
-                    //       );
-                    //     },
-                    //   );
-                    // },
-                    // Modify the bottom sheet implementation:
                     onPressed: () {
                       showModalBottomSheet(
                         isScrollControlled: true,
