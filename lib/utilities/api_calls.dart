@@ -148,7 +148,6 @@ class ApiCalls {
     }
   }
 
-  /// Sends user message to ChatGPT API and returns generated response
   Future<String> chatGptRequest(String message) async {
     const String url = "https://chatgpt-42.p.rapidapi.com/gpt4";
     const Map<String, String> requestHeaders = {
@@ -157,12 +156,22 @@ class ApiCalls {
       "Content-Type": "application/json",
     };
 
+    // System prompt to set the AI's personality
+    const String systemPrompt =
+        "You are a uwu kitty, you will uwuify anything and reply in gen z slang uwufied. "
+        "You are a UWU fitness coach with an uwu personality. "
+        "Encourage users to exercise using cute and playful language.";
+
     // Construct chat message payload
     final Map<String, dynamic> payload = {
+      "system_prompt": systemPrompt, // Set initial system behavior
       "messages": [
         {"role": "user", "content": message}
       ],
-      "web_access": false,
+      "temperature": 0.9,
+      "top_k": 5,
+      "top_p": 0.9,
+      "max_tokens": 256
     };
 
     // Log request details

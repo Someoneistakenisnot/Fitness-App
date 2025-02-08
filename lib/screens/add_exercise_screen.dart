@@ -67,6 +67,9 @@ List<String> durations = [
 class _AddExerciseScreenState extends State<AddExerciseScreen> {
   String? selectedActivity; // Variable to store selected activity
   String? selectedDuration; // Variable to store selected duration
+  bool isLoading = false; // Prevents multiple submissions
+  Future? _fetchBurnedCaloriesFuture; // Track ongoing request
+
   final TextEditingController activityController =
       TextEditingController(); // Controller for activity input
   final TextEditingController durationController =
@@ -118,51 +121,73 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 40, vertical: 16), // Button padding
                 ),
-                onPressed: () async {
-                  // Check if both activity and duration are selected
-                  if (selectedActivity == null || selectedDuration == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text(
-                            'Please select an activity and duration'),
-                        backgroundColor:
-                            Colors.red, // SnackBar background color
-                      ),
-                    );
-                    return; // Exit if validation fails
-                  }
+                onPressed: isLoading
+                    ? null
+                    : () async {
+                        if (selectedActivity == null ||
+                            selectedDuration == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text(
+                                    'Please select an activity and duration'),
+                                backgroundColor: Colors.red),
+                          );
+                          return;
+                        }
 
-                  // Fetch burned calories information based on selected activity and duration
-                  Exercise burnedCaloriesInfo = await ApiCalls()
-                      .fetchBurnedCalories(
-                          selectedActivity!, int.parse(selectedDuration!));
+                        if (_fetchBurnedCaloriesFuture != null) {
+                          return; // ✅ Prevent re-triggering the API call
+                        }
 
-                  // Create an Exercise object with the selected data
-                  Exercise exercises = Exercise(
-                    activity: selectedActivity!,
-                    burnedCalories: burnedCaloriesInfo.burnedCalories,
-                    duration: int.parse(selectedDuration!),
-                  );
+                        try {
+                          setState(() {
+                            isLoading = true;
+                            _fetchBurnedCaloriesFuture =
+                                ApiCalls().fetchBurnedCalories(
+                              selectedActivity!,
+                              int.parse(selectedDuration!),
+                            );
+                          });
 
-                  // Add the exercise data to Firebase
-                  await FirebaseCalls().addExercise(exercises);
+                          Exercise burnedCaloriesInfo =
+                              await _fetchBurnedCaloriesFuture!;
 
-                  // Show success message
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: const Text('Exercise added successfully!'),
-                      backgroundColor:
-                          Colors.green, // SnackBar background color
-                    ),
-                  );
+                          Exercise exercise = Exercise(
+                            activity: selectedActivity!,
+                            burnedCalories: burnedCaloriesInfo.burnedCalories,
+                            duration: int.parse(selectedDuration!),
+                          );
 
-                  // Call the callback function to update the exercise list
-                  widget.addExerciseCallback(
-                      selectedActivity!,
-                      int.parse(selectedDuration!),
-                      burnedCaloriesInfo.burnedCalories);
-                  Navigator.pop(context); // Close the screen after adding
-                },
+                          await FirebaseCalls().addExercise(exercise);
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Exercise added successfully!'),
+                                backgroundColor: Colors.green),
+                          );
+
+                          Navigator.pop(context);
+
+                          widget.addExerciseCallback(
+                              selectedActivity!,
+                              int.parse(selectedDuration!),
+                              burnedCaloriesInfo.burnedCalories);
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                                content: Text('Error: $e'),
+                                backgroundColor: Colors.red),
+                          );
+                        } finally {
+                          if (mounted) {
+                            setState(() {
+                              isLoading = false;
+                              _fetchBurnedCaloriesFuture =
+                                  null; // ✅ Reset Future
+                            });
+                          }
+                        }
+                      },
               ),
             ),
           ],
