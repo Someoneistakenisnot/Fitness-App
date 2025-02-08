@@ -1,8 +1,8 @@
-import 'package:flutter/material.dart'; // Flutter material design package
+import 'package:flutter/material.dart';
 
-import '../models/exercise.dart'; // Importing Exercise model
-import '../utilities/api_calls.dart'; // Importing API calls utility
-import '../utilities/firebase_calls.dart'; // Importing Firebase calls utility
+import '../models/exercise.dart';
+import '../utilities/api_calls.dart';
+import '../utilities/firebase_calls.dart';
 
 /// Screen for adding exercise data
 class AddExerciseScreen extends StatefulWidget {
@@ -68,18 +68,15 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
   String? selectedActivity; // Variable to store selected activity
   String? selectedDuration; // Variable to store selected duration
   bool isLoading = false; // Prevents multiple submissions
-  Future? _fetchBurnedCaloriesFuture; // Track ongoing request
 
-  final TextEditingController activityController =
-      TextEditingController(); // Controller for activity input
-  final TextEditingController durationController =
-      TextEditingController(); // Controller for duration input
+  final TextEditingController activityController = TextEditingController();
+  final TextEditingController durationController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0), // Padding for the screen
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -89,107 +86,97 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
               controller: activityController,
               options: activities,
               onSelected: (String selection) {
-                setState(() =>
-                    selectedActivity = selection); // Update selected activity
+                setState(() => selectedActivity = selection);
               },
             ),
-            const SizedBox(height: 16), // Space between fields
-
+            const SizedBox(height: 16),
             // Duration Input Field
             _buildAutocompleteTextField(
               label: 'Duration (minutes)',
               controller: durationController,
               options: durations,
               onSelected: (String selection) {
-                setState(() =>
-                    selectedDuration = selection); // Update selected duration
+                setState(() => selectedDuration = selection);
               },
             ),
-            const SizedBox(height: 24), // Space before the button
-
+            const SizedBox(height: 24),
             // Add Button
             Center(
               child: ElevatedButton(
-                child: const Text('ADD'), // Button text
+                child: const Text('ADD'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal, // Button background color
-                  foregroundColor: Colors.white, // Button text color
+                  backgroundColor: Colors.teal,
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(30.0), // Rounded button corners
+                    borderRadius: BorderRadius.circular(30.0),
                   ),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 40, vertical: 16), // Button padding
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                 ),
-                onPressed: isLoading
-                    ? null
-                    : () async {
-                        if (selectedActivity == null ||
-                            selectedDuration == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  'Please select an activity and duration'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                          return;
-                        }
+                onPressed: () async {
+                  // Immediately prevent duplicate taps.
+                  if (isLoading) return;
+                  isLoading = true;
+                  setState(() {});
 
-                        if (isLoading || _fetchBurnedCaloriesFuture != null) {
-                          return; // Prevent duplicate submissions
-                        }
+                  if (selectedActivity == null || selectedDuration == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please select an activity and duration'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                    isLoading = false;
+                    setState(() {});
+                    return;
+                  }
 
-                        setState(() {
-                          isLoading = true;
-                          _fetchBurnedCaloriesFuture =
-                              ApiCalls().fetchBurnedCalories(
-                            selectedActivity!,
-                            int.parse(selectedDuration!),
-                          );
-                        });
+                  try {
+                    // Fetch the burned calories from your API.
+                    final burnedCaloriesInfo =
+                        await ApiCalls().fetchBurnedCalories(
+                      selectedActivity!,
+                      int.parse(selectedDuration!),
+                    );
 
-                        try {
-                          Exercise burnedCaloriesInfo =
-                              await _fetchBurnedCaloriesFuture!;
+                    // Optionally, create a unique ID for your exercise.
+                    // (Make sure your Exercise model and FirebaseCalls.addExercise support it.)
+                    final String exerciseId =
+                        '${selectedActivity!}_${selectedDuration!}_${DateTime.now().millisecondsSinceEpoch}';
 
-                          Exercise exercise = Exercise(
-                            activity: selectedActivity!,
-                            burnedCalories: burnedCaloriesInfo.burnedCalories,
-                            duration: int.parse(selectedDuration!),
-                          );
+                    final exercise = Exercise(
+                      activity: selectedActivity!,
+                      burnedCalories: burnedCaloriesInfo.burnedCalories,
+                      duration: int.parse(selectedDuration!),
+                    );
 
-                          await FirebaseCalls().addExercise(exercise);
+                    // Write to Firebase.
+                    await FirebaseCalls().addExercise(exercise);
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Exercise added successfully!'),
-                              backgroundColor: Colors.green,
-                            ),
-                          );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Exercise added successfully!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
 
-                          Navigator.pop(context);
-
-                          widget.addExerciseCallback(
-                              selectedActivity!,
-                              int.parse(selectedDuration!),
-                              burnedCaloriesInfo.burnedCalories);
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Error: $e'),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        } finally {
-                          if (mounted) {
-                            setState(() {
-                              isLoading = false;
-                              _fetchBurnedCaloriesFuture = null; // Reset Future
-                            });
-                          }
-                        }
-                      },
+                    Navigator.pop(context);
+                    // Remove the manual callback so the Firebase stream isn’t duplicated.
+                    // widget.addExerciseCallback(...);
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  } finally {
+                    if (mounted) {
+                      isLoading = false;
+                      setState(() {});
+                    }
+                  }
+                },
               ),
             ),
           ],
@@ -198,7 +185,7 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
     );
   }
 
-  /// Builds an autocomplete text field for selecting activities or durations
+  /// Builds an autocomplete text field for selecting activities or durations.
   Widget _buildAutocompleteTextField({
     required String label,
     required TextEditingController controller,
@@ -206,21 +193,17 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
     required ValueChanged<String> onSelected,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-          vertical: 8.0), // Padding for the text field
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Autocomplete<String>(
         optionsBuilder: (TextEditingValue textEditingValue) {
           if (textEditingValue.text.isEmpty) {
-            return const Iterable<String>.empty(); // Return empty if no input
+            return const Iterable<String>.empty();
           }
-          // Filter options based on user input
-          return options.where((String option) {
-            return option
-                .toLowerCase()
-                .contains(textEditingValue.text.toLowerCase());
-          });
+          return options.where((String option) => option
+              .toLowerCase()
+              .contains(textEditingValue.text.toLowerCase()));
         },
-        onSelected: onSelected, // Callback when an option is selected
+        onSelected: onSelected,
         fieldViewBuilder: (BuildContext context,
             TextEditingController textEditingController,
             FocusNode focusNode,
@@ -229,14 +212,14 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
             label: label,
             controller: textEditingController,
             focusNode: focusNode,
-            inputType: TextInputType.text, // Text input type
+            inputType: TextInputType.text,
           );
         },
       ),
     );
   }
 
-  /// Builds a standard text field with specified properties
+  /// Builds a standard text field.
   Widget _buildTextField({
     required String label,
     required TextEditingController controller,
@@ -246,32 +229,28 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
     String? Function(String?)? validator,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(
-          vertical: 8.0), // Padding for the text field
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextField(
-        focusNode: focusNode, // Focus node for the text field
-        keyboardType: inputType, // Keyboard type for the text field
-        style: const TextStyle(color: Colors.black), // Text color
+        focusNode: focusNode,
+        keyboardType: inputType,
+        style: const TextStyle(color: Colors.black),
         decoration: InputDecoration(
-          filled: true, // Enable fill for the text field
-          fillColor: Colors.white, // Background color of the text field
-          labelText: label, // Label for the text field
-          labelStyle: TextStyle(color: Colors.teal[800]), // Label color
-          suffixText: suffixText, // Optional suffix text
+          filled: true,
+          fillColor: Colors.white,
+          labelText: label,
+          labelStyle: TextStyle(color: Colors.teal[800]),
+          suffixText: suffixText,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8.0), // Rounded corners
-            borderSide: const BorderSide(color: Colors.teal), // Border color
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: const BorderSide(color: Colors.teal),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius:
-                BorderRadius.circular(8.0), // Rounded corners when focused
-            borderSide: const BorderSide(
-                color: Colors.teal, width: 2.0), // Border color when focused
+            borderRadius: BorderRadius.circular(8.0),
+            borderSide: const BorderSide(color: Colors.teal, width: 2.0),
           ),
-          contentPadding:
-              const EdgeInsets.all(16), // Padding inside the text field
+          contentPadding: const EdgeInsets.all(16),
         ),
-        controller: controller, // Controller for the text field
+        controller: controller,
       ),
     );
   }
