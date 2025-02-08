@@ -128,27 +128,28 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
                             selectedDuration == null) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                content: Text(
-                                    'Please select an activity and duration'),
-                                backgroundColor: Colors.red),
+                              content: Text(
+                                  'Please select an activity and duration'),
+                              backgroundColor: Colors.red,
+                            ),
                           );
                           return;
                         }
 
-                        if (_fetchBurnedCaloriesFuture != null) {
-                          return; // ✅ Prevent re-triggering the API call
+                        if (isLoading || _fetchBurnedCaloriesFuture != null) {
+                          return; // Prevent duplicate submissions
                         }
 
-                        try {
-                          setState(() {
-                            isLoading = true;
-                            _fetchBurnedCaloriesFuture =
-                                ApiCalls().fetchBurnedCalories(
-                              selectedActivity!,
-                              int.parse(selectedDuration!),
-                            );
-                          });
+                        setState(() {
+                          isLoading = true;
+                          _fetchBurnedCaloriesFuture =
+                              ApiCalls().fetchBurnedCalories(
+                            selectedActivity!,
+                            int.parse(selectedDuration!),
+                          );
+                        });
 
+                        try {
                           Exercise burnedCaloriesInfo =
                               await _fetchBurnedCaloriesFuture!;
 
@@ -162,8 +163,9 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
 
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                content: Text('Exercise added successfully!'),
-                                backgroundColor: Colors.green),
+                              content: Text('Exercise added successfully!'),
+                              backgroundColor: Colors.green,
+                            ),
                           );
 
                           Navigator.pop(context);
@@ -175,15 +177,15 @@ class _AddExerciseScreenState extends State<AddExerciseScreen> {
                         } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                                content: Text('Error: $e'),
-                                backgroundColor: Colors.red),
+                              content: Text('Error: $e'),
+                              backgroundColor: Colors.red,
+                            ),
                           );
                         } finally {
                           if (mounted) {
                             setState(() {
                               isLoading = false;
-                              _fetchBurnedCaloriesFuture =
-                                  null; // ✅ Reset Future
+                              _fetchBurnedCaloriesFuture = null; // Reset Future
                             });
                           }
                         }
